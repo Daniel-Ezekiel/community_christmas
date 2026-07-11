@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   COMMUNITY CHRISTMAS — DESIGN TOKENS
+   Source of truth for all raw values. Reference these directly in custom CSS
+   or via the Tailwind utilities generated in @theme below.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand & Accent */
+  --navy:       #113444;
+  --sage:       #7EA595;
+  --slate:      #395460;
+  --amber:      #FEC85E;
+  --amber-dark: #633806;
+
+  /* Surface */
+  --off-white:  #FAFAFA;
+  --white:      #FFFFFF;
+  --light-sage: #C2D7D1;
+  --light-grey: #E2E9ED;
+
+  /* Text & Hairlines */
+  --ink:         #113444;
+  --mid-grey:    #787878;
+  --card-border: #D1D9DC;
+  --divider:     #E0E6E8;
+
+  /* Semantic — badge fills + text pairs (badges only, never for layout) */
+  --success-fill: #E1F5EE;
+  --success-text: #085041;
+  --warning-fill: #FAEEDA;
+  --warning-text: #633806;
+  --full-fill:    #FCEBEB;
+  --full-text:    #791F1F;
+  --access-fill:  #D9EDF4;
+  --access-text:  #062D53;
 }
+
+/* ==========================================================================
+   TAILWIND v4 THEME
+   Exposes design tokens as Tailwind utility classes.
+   @theme inline keeps var() references so :root changes propagate at runtime.
+
+   Generated utilities (examples):
+     Colors  → bg-navy, text-sage, border-slate, ring-amber …
+     Radius  → rounded-tag, rounded-input, rounded-card, rounded-chip, rounded-pill
+   ========================================================================== */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Font — resolved from next/font CSS variable injected in layout.tsx */
+  --font-sans: var(--font-montserrat);
+
+  /* Brand & Accent */
+  --color-navy:       var(--navy);
+  --color-sage:       var(--sage);
+  --color-slate:      var(--slate);
+  --color-amber:      var(--amber);
+  --color-amber-dark: var(--amber-dark);
+
+  /* Surface */
+  --color-off-white:  var(--off-white);
+  --color-light-sage: var(--light-sage);
+  --color-light-grey: var(--light-grey);
+
+  /* Text & Hairlines */
+  --color-ink:         var(--ink);
+  --color-mid-grey:    var(--mid-grey);
+  --color-card-border: var(--card-border);
+  --color-divider:     var(--divider);
+
+  /* Semantic */
+  --color-success-fill: var(--success-fill);
+  --color-success-text: var(--success-text);
+  --color-warning-fill: var(--warning-fill);
+  --color-warning-text: var(--warning-text);
+  --color-full-fill:    var(--full-fill);
+  --color-full-text:    var(--full-text);
+  --color-access-fill:  var(--access-fill);
+  --color-access-text:  var(--access-text);
+
+  /* Border Radius
+     tag=4 · input=8 · card=12 · chip=20 · pill=full */
+  --radius-tag:   4px;
+  --radius-input: 8px;
+  --radius-card:  12px;
+  --radius-chip:  20px;
+  --radius-pill:  9999px;
+
+  /* Breakpoints
+     Phone  : default (no prefix) — ≤ 640px  — single column
+     Tablet : sm                  — ≥ 641px  — 2-col cards, map + list stack
+     Desktop: lg                  — ≥ 1025px — 4-col cards, content max 1440px */
+  --breakpoint-sm: 641px;
+  --breakpoint-lg: 1025px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+html {
+  background-color: var(--off-white);
+  color: var(--ink);
 }
 
+/* Enforce design system rule: body text never below 16px */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  line-height: 1.625; /* matches 16px / 26 line-height from type scale */
 }
