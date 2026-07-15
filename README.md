@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Community Christmas
+
+A web app for **Marmalade Trust's** Community Christmas initiative — bringing people
+together to tackle loneliness over the festive season.
+
+Built with [Next.js](https://nextjs.org) (App Router), React, TypeScript and
+[Tailwind CSS](https://tailwindcss.com).
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies and run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the app by modifying files in `app/`. Pages auto-update as you edit.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Command         | Description                          |
+| --------------- | ------------------------------------ |
+| `npm run dev`   | Start the local development server   |
+| `npm run build` | Create a production build            |
+| `npm run start` | Run the production build locally     |
+| `npm run lint`  | Lint the codebase with ESLint        |
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/           App Router routes, layout and global styles
+public/        Static assets
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Fonts
 
-## Deploy on Vercel
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts)
+to load and optimize [Geist](https://vercel.com/font). The font is exposed through the
+`--font-sans` / `--font-mono` CSS variables and applied globally in `app/globals.css`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Branching & Contributions
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `main` — production / stable.
+- `development` — integration branch; feature work is merged here first.
+- Feature branches (e.g. `fix/…`, `feat/…`) — branch off `development` and open a PR back into it.
+
+## Deploy
+
+The app is intended to be deployed on the [Vercel Platform](https://vercel.com/new).
+See the [Next.js deployment docs](https://nextjs.org/docs/app/building-your-application/deploying)
+for details.
