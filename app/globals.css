@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* ==========================================================================
    COMMUNITY CHRISTMAS — DESIGN TOKENS
    Source of truth for all raw values. Reference these directly in custom CSS
@@ -32,9 +33,24 @@
   --warning-fill: #FAEEDA;
   --warning-text: #633806;
   --full-fill:    #FCEBEB;
-  --full-text:    #791F1F;
+  --full-text:    #781F1F;
   --access-fill:  #D9EDF4;
   --access-text:  #062D53;
+
+  /* Badge fills (event-specific) */
+  --free-fill:  #E0F4EE;
+  --free-text:  #083428;
+  --paid-fill:  #FAEED9;
+  /* paid-text uses --amber-dark (#633806) */
+
+  /* Interactive states */
+  --hover-tint:          #F1F5F4; /* card / chip hover background */
+  --error:               #E24B4A; /* error borders, error button bg */
+  --btn-primary-hover:   #255460; /* primary button hover */
+
+  /* Supplementary text */
+  --section-label: #9AA5AA; /* design system section headers */
+  --placeholder:   #9E9E9E; /* input placeholder text */
 }
 
 /* ==========================================================================
@@ -79,6 +95,20 @@
   --color-access-fill:  var(--access-fill);
   --color-access-text:  var(--access-text);
 
+  /* Badge (event-specific) */
+  --color-free-fill: var(--free-fill);
+  --color-free-text: var(--free-text);
+  --color-paid-fill: var(--paid-fill);
+
+  /* Interactive states */
+  --color-hover-tint:         var(--hover-tint);
+  --color-error:              var(--error);
+  --color-btn-primary-hover:  var(--btn-primary-hover);
+
+  /* Supplementary text */
+  --color-section-label: var(--section-label);
+  --color-placeholder:   var(--placeholder);
+
   /* Border Radius
      tag=4 · input=8 · card=12 · chip=20 · pill=full */
   --radius-tag:   4px;
@@ -91,8 +121,10 @@
      Phone  : default (no prefix) — ≤ 640px  — single column
      Tablet : sm                  — ≥ 641px  — 2-col cards, map + list stack
      Desktop: lg                  — ≥ 1025px — 4-col cards, content max 1440px */
-  --breakpoint-sm: 641px;
-  --breakpoint-lg: 1025px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
 }
 
 /* ==========================================================================
@@ -108,4 +140,5 @@ html {
 body {
   font-size: 1rem;
   line-height: 1.625; /* matches 16px / 26 line-height from type scale */
+  /* overflow: hidden; */
 }

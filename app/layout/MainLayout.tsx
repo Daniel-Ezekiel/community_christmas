@@ -1,0 +1,14 @@
+import Footer from "./Footer";
+import Header from "./Header";
+
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+        <Header />
+        <main className="p-3">
+            {children}
+        </main>
+        <Footer />
+    </>
+  )
+}
