@@ -47,7 +47,7 @@ export default function EventsMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
           {
-            events.map((eventData) => <MapMarker key={eventData.id} position={position} eventData={eventData} />)
+            events.map((eventData) => <MapMarker key={eventData.id} eventData={eventData} />)
           }
       </MapContainer>
     </div>

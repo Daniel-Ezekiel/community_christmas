@@ -24,7 +24,7 @@ const getEvents = async () => {
   //       console.log(process.env.NODE_ENV, process.env.NEXT_PUBLIC_PROD_URL, process.env.NEXT_PUBLIC_LOCAL_URL)
 
   try {
-    const res = await fetch(`/api`, {
+    const res = await fetch(`/api/events/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
