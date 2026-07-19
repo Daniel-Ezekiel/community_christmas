@@ -2,8 +2,6 @@
 
 A proximity-based event finder for [Marmalade Trust](https://www.marmaladetrust.org/community-christmas)'s Community Christmas initiative. Helps adults who would otherwise be alone on Christmas Day find a local meal, activity, or welcoming space near them.
 
-Built by volunteers as part of the [Student Tech Alliance](https://www.studenttechalliance.org/) programme.
-
 ---
 
 ## Stack
