@@ -2,12 +2,18 @@
 // Mirrors the shaped event object returned by the Google Sheet route handler
 // (see app/api/route.ts) and, eventually, the HubSpot API response.
 
+import { LatLngExpression } from "leaflet";
+
 interface EventDetails {
   id: string;
   eventName: string;
   organisation: string;
   venueName: string;
   postcode: string;
+  coordinates: {
+    isTerminated: boolean,
+    latLng: LatLngExpression,
+  }
   city: string;
   address: string;
   eventType: string;

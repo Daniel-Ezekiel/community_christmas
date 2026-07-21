@@ -2,9 +2,10 @@
 
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression } from "leaflet";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { useRef } from "react";
-import MapMarker from "./MapMarker";
+import { EventDetails } from "@/types";
+import EventCard from "./EventCard";
 
 // Importing the marker PNGs as JS modules (the usual community fix) crashes
 // the renderer under this project's Next/Turbopack setup — Next's image-import
@@ -20,21 +21,27 @@ L.Icon.Default.mergeOptions({
 export default function EventsMap({
   position,
   zoom,
-  events
+  events,
+  handleModalOpen,
+  isForModal = false,
+  height = "475px"
 }: {
   position: LatLngExpression;
   zoom?: number;
-  events: EventDetails[]
+  events: EventDetails[];
+  handleModalOpen?: (eventID: string) => void;
+  isForModal?: boolean;
+  height?: string
 }) {
   const mapRef = useRef<L.Map | null>(null);
 
   return (
-    <div style={{ height: 400, width: "100%" }}>
+    <div>
       <MapContainer
         center={position}
         zoom={zoom}
         scrollWheelZoom={false}
-        style={{ height: "100%", width: "100%" }}
+        style={{ minHeight: height, width: "100%" }}
         ref={(map) => {
           if (map && mapRef.current && mapRef.current !== map) {
             mapRef.current.remove(); // strips the old instance's _leaflet_id stamp
@@ -46,9 +53,22 @@ export default function EventsMap({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-          {
-            events.map((eventData) => <MapMarker key={eventData.id} eventData={eventData} />)
-          }
+        {events.map((eventData) => (
+          <Marker key={eventData.id} position={eventData.coordinates.latLng}>
+            {!isForModal && (
+              <Popup>
+                <EventCard
+                  event={eventData}
+                  handleModalOpen={([_id]: string[] | string) => {
+                    // Accepts an eventID param to match EventCard's signature,
+                    // but uses the current marker's id when opening the modal.
+                    if (handleModalOpen) handleModalOpen(eventData.id);
+                  }}
+                />
+              </Popup>
+            )}
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
