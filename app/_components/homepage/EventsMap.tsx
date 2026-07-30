@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression } from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { AttributionControl, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { useRef } from "react";
 import { EventDetails } from "@/types";
 import EventCard from "./EventCard";
@@ -42,6 +42,7 @@ export default function EventsMap({
         zoom={zoom}
         scrollWheelZoom={false}
         style={{ minHeight: height, width: "100%" }}
+        attributionControl={false}
         ref={(map) => {
           if (map && mapRef.current && mapRef.current !== map) {
             mapRef.current.remove(); // strips the old instance's _leaflet_id stamp
@@ -49,6 +50,7 @@ export default function EventsMap({
           mapRef.current = map;
         }}
       >
+        <AttributionControl position="bottomright" prefix={"Leaflet"} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

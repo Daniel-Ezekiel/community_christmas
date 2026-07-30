@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import Button from "../Button";
 import { EventDetails } from "@/types";
+import { PulseLoader } from "react-spinners";
 
 const EventsMap = dynamic(
   () => import("@/app/_components/homepage/EventsMap"),
@@ -43,41 +44,11 @@ const getEvents = async () => {
   }
 };
 
-const testEvent: EventDetails = {
-  id: "a898cd70-a993-475c-ad9d-45855b08b493",
-  eventName: "Inverness Christmas Celebration Lunch",
-  organisation: "Highland Homeless Trust",
-  venueName: "Eden Court Community Room",
-  postcode: "IV3 5QG",
-  city: "Inverness",
-  address: "Bishops Road",
-  eventType: "Christmas Lunch",
-  description:
-    "A festive Christmas lunch in Inverness with seasonal food and entertainment. Transport assistance available on request.",
-  isChristmasDay: "Yes",
-  time: "12pm - 4pm",
-  openToAll: "Yes",
-  bookingRequired: "Yes - via phone or email",
-  cost: "Free",
-  accessibility: "Accessible throughout, parking available",
-  spacesStatus: "Spaces Available",
-  contactPublic: "07700 900134\nhello@hht.example.org",
-  mapDescription:
-    "Venue: Eden Court Community Room\nOrganisation: Highland Homeless Trust\n\nTime: 12pm - 4pm\n\nDescription: A festive Christmas lunch in Inverness with seasonal food and entertainment. Transport assistance available on request.\n\nBooking: Yes - via phone or email\nCost: Free\nAccessibility: Accessible throughout, parking available\n\nContact: 07700 900134 hello@hht.example.org\n\nCapacity: 45\nStatus: Spaces Available",
-  lastUpdated: "19/07/2026",
-  coordinates: {
-    isTerminated: false,
-    latLng: [51.493489, -0.101517],
-  },
-};
-
 export default function Events() {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
-  const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(
-    testEvent,
-  );
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(null);
 
-  const { isPending, error, data } = useQuery({
+  const { isPending, isLoading, error, data } = useQuery({
     queryKey: ["eventsData"],
     queryFn: getEvents,
   });
@@ -100,7 +71,6 @@ export default function Events() {
     const eventToDisplay = eventsData.find((event) => event.id === eventID);
     if (eventToDisplay?.id) {
       setSelectedEvent(eventToDisplay);
-      console.log(eventToDisplay);
     } else return;
   };
 
@@ -109,7 +79,12 @@ export default function Events() {
     setSelectedEvent(null);
   };
 
-  if (isPending) return "Loading...";
+  if (isPending || isLoading)
+    return (
+      <div className="max-w-fit mx-auto grid gap-4">
+       <p className="text-center"> Loading...</p>
+      </div>
+    );
 
   if (error) return "An error has occurred: " + error.message;
 
@@ -159,22 +134,22 @@ export default function Events() {
         ))}
       </section>
 
-      <section
-        className={`${isModalOpen ? "fixed top-0 left-0 z-1000" : "-top-full"} bg-off-white/45 backdrop-blur-sm h-dvh w-dvw grid place-items-center transition-all ease-in-out duration-300`}
-      >
-        {!selectedEvent ? (
-          <p className="grid">
-            <button
-              onClick={handleModalClose}
-              className="flex gap-2 items-center cursor-pointer font-bold text-sage text-lg lg:text-xl"
-            >
-              <ArrowLeft />
-              Back to Results
-            </button>
-            Failed to display event details. Invalid Event ID
-          </p>
-        ) : (
-          selectedEvent && (
+      {selectedEvent && (
+        <section
+          className={`${isModalOpen ? "fixed top-0 left-0 z-1000" : "hidden"} bg-off-white/45 backdrop-blur-sm h-dvh w-dvw grid place-items-center transition-all ease-in-out duration-300`}
+        >
+          {!selectedEvent ? (
+            <p className="grid">
+              <button
+                onClick={handleModalClose}
+                className="flex gap-2 items-center cursor-pointer font-bold text-sage text-lg lg:text-xl"
+              >
+                <ArrowLeft />
+                Back to Results
+              </button>
+              Failed to display event details. Invalid Event ID
+            </p>
+          ) : (
             <div className="bg-off-white h-dvh overflow-scroll max-w-270 mx-auto">
               <div className="bg-navy p-4 py-6 grid gap-4">
                 <button
@@ -287,9 +262,9 @@ export default function Events() {
                 </div>
               </div>
             </div>
-          )
-        )}
-      </section>
+          )}
+        </section>
+      )}
     </div>
   );
 }
