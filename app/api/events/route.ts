@@ -12,6 +12,6 @@ export async function GET() {
     return Response.json(data, { status: 200 });
   } catch (err) {
     console.error(err);
-    return Response.json({ error: "Failed to fetch data" }, { status: 500 });
+    throw new Error("Failed to fetch data");
   }
 }

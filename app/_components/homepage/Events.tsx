@@ -6,10 +6,14 @@ import EventCard from "./EventCard";
 import { useQuery } from "@tanstack/react-query";
 // import EventsMap from "./EventsMap";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../Button";
 import { EventDetails } from "@/types";
 import { PulseLoader } from "react-spinners";
+import { useSearchParams } from "next/navigation";
+import { getPostcodeDetails } from "@/app/_utils/getPostcodeDetails";
+import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
+import { LatLngExpression } from "leaflet";
 
 const EventsMap = dynamic(
   () => import("@/app/_components/homepage/EventsMap"),
@@ -45,15 +49,65 @@ const getEvents = async () => {
 };
 
 export default function Events() {
+  const searchParams = useSearchParams();
+  const location = searchParams.get("location");
+  const distance = searchParams.get("distance");
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoadingPostcodeDetails, setIsLoadingPostcodeDetails] =
+    useState<boolean>(location ? true : false);
   const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(null);
+  const [postcodeCoordinates, setPostcodeCoordinates] =
+    useState<LatLngExpression | null>(null);
 
   const { isPending, isLoading, error, data } = useQuery({
     queryKey: ["eventsData"],
     queryFn: getEvents,
   });
 
-  const eventsData: EventDetails[] | [] = data?.events || [];
+  const allEventsData: EventDetails[] | [] = data?.events || [];
+  // const eventsData: EventDetails[] | [] = data?.events || [];
+
+  useEffect(() => {
+    let mounted = true;
+    if (!location) return;
+    (async () => {
+      try {
+        const details = await getPostcodeDetails(location);
+        if (mounted)
+          setPostcodeCoordinates([
+            details.result.latitude,
+            details.result.longitude,
+          ]);
+      } catch (err) {
+        console.error(err);
+        if (mounted) setPostcodeCoordinates(null);
+      } finally {
+        if (mounted) setIsLoadingPostcodeDetails(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [location]);
+
+  const filteredEventsData =
+    (postcodeCoordinates &&
+      distance &&
+      allEventsData.filter((event) => {
+        const eventDistance = calculateDistanceInMiles(
+          postcodeCoordinates as number[],
+          event.coordinates.latLng as number[],
+        );
+
+        return eventDistance <= Number(distance);
+      })) ||
+    [];
+
+  const eventsData: EventDetails[] | [] =
+    location && distance
+      ? (filteredEventsData as EventDetails[] | [])
+      : allEventsData;
 
   const filterOptions = [
     "All Events",
@@ -79,12 +133,13 @@ export default function Events() {
     setSelectedEvent(null);
   };
 
-  if (isPending || isLoading)
+  if (isPending || isLoading || isLoadingPostcodeDetails) {
     return (
       <div className="max-w-fit mx-auto grid gap-4">
-       <p className="text-center"> Loading...</p>
+        <p className="text-center"> Loading...</p>
       </div>
     );
+  }
 
   if (error) return "An error has occurred: " + error.message;
 
@@ -98,7 +153,9 @@ export default function Events() {
         </div>
 
         <h2 className="font-semibold text-lg md:text-xl lg:text-2xl lg:font-bold lg:py-6 xl:text-4xl">
-          4 Events near <span>Bristol</span>
+          {location
+            ? `${eventsData.length} Events near ${location}`
+            : `${eventsData.length} events`}
         </h2>
 
         <div className="w-full p-1 border border-card-border bg-white rounded-full grid grid-cols-2 sm:max-w-90 sm:justify-self-end">
@@ -138,8 +195,8 @@ export default function Events() {
         <section
           className={`${isModalOpen ? "fixed top-0 left-0 z-1000" : "hidden"} bg-off-white/45 backdrop-blur-sm h-dvh w-dvw grid place-items-center transition-all ease-in-out duration-300`}
         >
-          {!selectedEvent ? (
-            <p className="grid">
+          <div className="bg-off-white h-dvh overflow-scroll max-w-270 mx-auto">
+            <div className="bg-navy p-4 py-6 grid gap-4">
               <button
                 onClick={handleModalClose}
                 className="flex gap-2 items-center cursor-pointer font-bold text-sage text-lg lg:text-xl"
@@ -147,122 +204,109 @@ export default function Events() {
                 <ArrowLeft />
                 Back to Results
               </button>
-              Failed to display event details. Invalid Event ID
-            </p>
-          ) : (
-            <div className="bg-off-white h-dvh overflow-scroll max-w-270 mx-auto">
-              <div className="bg-navy p-4 py-6 grid gap-4">
-                <button
-                  onClick={handleModalClose}
-                  className="flex gap-2 items-center cursor-pointer font-bold text-sage text-lg lg:text-xl"
-                >
-                  <ArrowLeft />
-                  Back to Results
-                </button>
-                <h3 className="text-white text-2xl text-center font-extrabold lg:text-4xl">
-                  {selectedEvent.eventName}{" "}
-                </h3>
-                <div className="flex justify-center items-center gap-4">
-                  <FilterPill filterName="Free" />
-                  <FilterPill filterName="Accessible" />
+              <h3 className="text-white text-2xl text-center font-extrabold lg:text-4xl">
+                {selectedEvent.eventName}{" "}
+              </h3>
+              <div className="flex justify-center items-center gap-4">
+                <FilterPill filterName="Free" />
+                <FilterPill filterName="Accessible" />
+              </div>
+            </div>
+
+            <div className="p-4 py-8 flex flex-col gap-6 md:grid md:gap-4 md:px-10 lg:px-12 lg:grid-cols-9">
+              <h4 className="text-lg text-sage font-bold uppercase col-span-full md:text-xl">
+                Hosted by {selectedEvent.organisation}
+              </h4>
+
+              <div className="grid gap-3 lg:col-span-4 lg:grid-cols-2">
+                <div className="text-lg grid grid-cols-[auto_1fr] grid-rows-[fit-content_fit-content] gap-x-2 md:text-xl lg:col-span-full">
+                  <MapPin className="text-sage self-end" />
+                  <h5 className="text-navy font-bold col-start-2 self-end">
+                    {selectedEvent.venueName}
+                  </h5>
+                  <p className="col-start-2 self-start">
+                    {selectedEvent.address}, {selectedEvent.city},{" "}
+                    {selectedEvent.postcode}
+                  </p>
+                </div>
+
+                <div className="text-lg text-navy md:text-xl ">
+                  <h5 className="font-bold uppercase">Date</h5>
+                  <p>
+                    {selectedEvent.isChristmasDay &&
+                      "Christmas Day, 25 December"}
+                  </p>
+                </div>
+
+                <div className="text-lg text-navy md:text-xl ">
+                  <h5 className="font-bold uppercase">Time</h5>
+                  <p>{selectedEvent.time}</p>
+                </div>
+
+                <div className="text-lg text-navy md:text-xl ">
+                  <h5 className="font-bold uppercase">Event Type</h5>
+                  <p>{selectedEvent.eventType}</p>
+                </div>
+
+                <div className="text-lg text-navy md:text-xl ">
+                  <h5 className="font-bold uppercase">Distance</h5>
+                  <p>0.4 Miles</p>
                 </div>
               </div>
 
-              <div className="p-4 py-8 flex flex-col gap-6 md:grid md:gap-4 md:px-10 lg:px-12 lg:grid-cols-9">
-                <h4 className="text-lg text-sage font-bold uppercase col-span-full md:text-xl">
-                  Hosted by {selectedEvent.organisation}
-                </h4>
+              <div className="rounded-chip overflow-hidden lg:col-span-5 lg:col-start-5 lg:row-start-2">
+                <EventsMap
+                  events={[selectedEvent]}
+                  position={selectedEvent.coordinates.latLng}
+                  zoom={20}
+                  isForModal={true}
+                  height="300px"
+                />
+              </div>
 
-                <div className="grid gap-3 lg:col-span-4 lg:grid-cols-2">
-                  <div className="text-lg grid grid-cols-[auto_1fr] grid-rows-[fit-content_fit-content] gap-x-2 md:text-xl lg:col-span-full">
-                    <MapPin className="text-sage self-end" />
-                    <h5 className="text-navy font-bold col-start-2 self-end">
-                      {selectedEvent.venueName}
-                    </h5>
-                    <p className="col-start-2 self-start">
-                      {selectedEvent.address}, {selectedEvent.city},{" "}
-                      {selectedEvent.postcode}
-                    </p>
-                  </div>
+              <div className=" col-span-full text-lg text-navy md:text-xl">
+                <h5 className="font-bold uppercase">About this Event</h5>
+                <p>{selectedEvent.description}</p>
+              </div>
 
-                  <div className="text-lg text-navy md:text-xl ">
-                    <h5 className="font-bold uppercase">Date</h5>
-                    <p>
-                      {selectedEvent.isChristmasDay &&
-                        "Christmas Day, 25 December"}
-                    </p>
-                  </div>
+              <div className=" col-span-full text-lg text-navy bg-light-sage rounded-chip p-4 md:text-xl">
+                <h5 className="font-bold uppercase mb-4">Accessibility</h5>
+                <p>{selectedEvent.accessibility}</p>
+              </div>
 
-                  <div className="text-lg text-navy md:text-xl ">
-                    <h5 className="font-bold uppercase">Time</h5>
-                    <p>{selectedEvent.time}</p>
-                  </div>
+              <div className=" col-span-full text-lg text-navy md:text-xl">
+                <h5 className="font-bold uppercase">Cost</h5>
+                <span>{selectedEvent.cost}</span>
+              </div>
 
-                  <div className="text-lg text-navy md:text-xl ">
-                    <h5 className="font-bold uppercase">Event Type</h5>
-                    <p>{selectedEvent.eventType}</p>
-                  </div>
-
-                  <div className="text-lg text-navy md:text-xl ">
-                    <h5 className="font-bold uppercase">Distance</h5>
-                    <p>0.4 Miles</p>
-                  </div>
+              <div className=" col-span-full text-lg text-navy md:text-xl">
+                <div className="p-4 bg-[#fefddb] text-lg text-navy rounded-chip md:text-xl">
+                  <h5 className="font-bold uppercase bg-light-amber rounded-chip">
+                    Booking
+                  </h5>
+                  <span>{selectedEvent.bookingRequired}</span>
                 </div>
 
-                <div className="rounded-chip overflow-hidden lg:col-span-5 lg:col-start-5 lg:row-start-2">
-                  <EventsMap
-                    events={[selectedEvent]}
-                    position={selectedEvent.coordinates.latLng}
-                    zoom={20}
-                    isForModal={true}
-                    height="300px"
-                  />
-                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    className="border border-sage p-4 rounded-chip text-navy text-lg font-bold lg:text-xl"
+                  >
+                    {selectedEvent.contactPublic.split("\n")[0]}
+                  </Button>
 
-                <div className=" col-span-full text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">About this Event</h5>
-                  <p>{selectedEvent.description}</p>
-                </div>
-
-                <div className=" col-span-full text-lg text-navy bg-light-sage rounded-chip p-4 md:text-xl">
-                  <h5 className="font-bold uppercase mb-4">Accessibility</h5>
-                  <p>{selectedEvent.accessibility}</p>
-                </div>
-
-                <div className=" col-span-full text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">Cost</h5>
-                  <span>{selectedEvent.cost}</span>
-                </div>
-
-                <div className=" col-span-full text-lg text-navy md:text-xl">
-                  <div className="p-4 bg-[#fefddb] text-lg text-navy rounded-chip md:text-xl">
-                    <h5 className="font-bold uppercase bg-light-amber rounded-chip">
-                      Booking
-                    </h5>
-                    <span>{selectedEvent.bookingRequired}</span>
-                  </div>
-
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      className="border border-sage p-4 rounded-chip text-navy text-lg font-bold lg:text-xl"
-                    >
-                      {selectedEvent.contactPublic.split("\n")[0]}
-                    </Button>
-
-                    <Button
-                      variant="secondary"
-                      type="button"
-                      className="border border-sage p-4 rounded-chip text-navy text-lg font-bold lg:text-xl"
-                    >
-                      {selectedEvent.contactPublic.split("\n")[1]}
-                    </Button>
-                  </div>
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    className="border border-sage p-4 rounded-chip text-navy text-lg font-bold lg:text-xl"
+                  >
+                    {selectedEvent.contactPublic.split("\n")[1]}
+                  </Button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </section>
       )}
     </div>
