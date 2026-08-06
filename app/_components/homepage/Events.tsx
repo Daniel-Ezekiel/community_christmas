@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, List, Map, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight, List, Map, MapPin } from "lucide-react";
 import FilterPill from "../FilterPill";
 import EventCard from "./EventCard";
 import { useQuery } from "@tanstack/react-query";
@@ -62,6 +62,7 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(null);
   const [postcodeCoordinates, setPostcodeCoordinates] =
     useState<LatLngExpression | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const { isPending, isLoading, error, data } = useQuery({
     queryKey: ["eventsData"],
@@ -164,13 +165,13 @@ export default function Events() {
         <div className="w-full p-1 border border-card-border bg-white rounded-full grid grid-cols-2 sm:max-w-90 sm:justify-self-end">
           <button
             onClick={() => setIsMapActive(true)}
-            className={`p-1 flex items-center justify-center gap-2 text-center font-semibold rounded-full transition-all ease-in-out duration-500 ${isMapActive ? 'bg-navy text-white' : 'bg-white text-navy'}`}
+            className={`p-1 flex items-center justify-center gap-2 text-center font-semibold rounded-full transition-all ease-in-out duration-500 cursor-pointer ${isMapActive ? "bg-navy text-white" : "bg-white text-navy"}`}
           >
             <Map /> Map
           </button>
           <button
             onClick={() => setIsMapActive(false)}
-            className={`p-2 flex items-center justify-center gap-2 text-center rounded-full transition-all ease-in-out duration-500 ${!isMapActive ? 'bg-navy text-white' : 'bg-white text-navy'}`}
+            className={`p-2 flex items-center justify-center gap-2 text-center rounded-full transition-all ease-in-out duration-500 cursor-pointer ${!isMapActive ? "bg-navy text-white" : "bg-white text-navy"}`}
           >
             <List /> List
           </button>
@@ -190,17 +191,39 @@ export default function Events() {
         )}
       </section>
 
-      <section className="mt-8 grid gap-4 md:place-items-stretch lg:grid-cols-3">
-        {Boolean(eventsData.length) &&
-          eventsData.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              location={location}
-              postcodeCoords={postcodeCoordinates as LatLngExpression}
-              handleModalOpen={handleModalOpen}
-            />
-          ))}
+      <section className="mt-8 grid gap-4 md:place-items-stretch md:grid-cols-2 lg:grid-cols-3">
+        {Boolean(eventsData.length) && (
+          <>
+            {eventsData
+              .slice((currentPage - 1) * 12, currentPage * 12)
+              .map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  location={location}
+                  postcodeCoords={postcodeCoordinates as LatLngExpression}
+                  handleModalOpen={handleModalOpen}
+                />
+              ))}
+
+            <div className="mt-4 col-span-full flex justify-center gap-4">
+              <Button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                isDisabled={currentPage === 1}
+                className="w-36 flex justify-center items-center gap-2 p-2 px-4 rounded-xl transition-all ease-in-out duration-300"
+              >
+                <ArrowLeft /> Previous
+              </Button>
+              <Button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                isDisabled={currentPage * 12 >= eventsData.length}
+                className="w-36 flex justify-center items-center gap-2 p-2 px-4 rounded-xl transition-all ease-in-out duration-300"
+              >
+                Next <ArrowRight />
+              </Button>
+            </div>
+          </>
+        )}
 
         {!eventsData.length && (
           <div className="min-h-80 my-10 col-span-full grid gap-4 place-items-center text-center md:max-w-205 md:mx-auto md:px-20 md:py-10 md:bg-off-white md:border md:border-card-border md:rounded-xl">
