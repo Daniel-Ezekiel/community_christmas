@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import { Suspense } from "react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${montserrat.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-off-white text-ink font-sans">
-       <Providers>{children}</Providers>
+        <Suspense>
+          <Providers>{children}</Providers>
+        </Suspense>
       </body>
     </html>
   );

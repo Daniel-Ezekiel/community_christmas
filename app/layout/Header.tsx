@@ -50,6 +50,7 @@ export default function Header() {
                   <option value="10">Within 10 miles</option>
                   <option value="15">Within 15 miles</option>
                   <option value="20">Within 20 miles</option>
+                  <option value="25">Within 25 miles</option>
                 </select>
               </div>
               <Button variant="default" type="submit">

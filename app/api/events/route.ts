@@ -12,6 +12,7 @@ export async function GET() {
     return Response.json(data, { status: 200 });
   } catch (err) {
     console.error(err);
+
     throw new Error("Failed to fetch data");
   }
 }

@@ -22,6 +22,8 @@ export default function EventsMap({
   position,
   zoom,
   events,
+  location,
+  postcodeCoords,
   handleModalOpen,
   isForModal = false,
   height = "475px"
@@ -29,6 +31,8 @@ export default function EventsMap({
   position: LatLngExpression;
   zoom?: number;
   events: EventDetails[];
+  location: string | null;
+  postcodeCoords?: LatLngExpression;
   handleModalOpen?: (eventID: string) => void;
   isForModal?: boolean;
   height?: string
@@ -61,6 +65,8 @@ export default function EventsMap({
               <Popup>
                 <EventCard
                   event={eventData}
+                  location={location}
+                  postcodeCoords={postcodeCoords}
                   handleModalOpen={([_id]: string[] | string) => {
                     // Accepts an eventID param to match EventCard's signature,
                     // but uses the current marker's id when opening the modal.

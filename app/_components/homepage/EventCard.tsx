@@ -1,12 +1,21 @@
+import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
 import { EventDetails } from "@/types";
+import { LatLngExpression } from "leaflet";
 
 export default function EventCard({
   event,
+  location,
+  postcodeCoords,
   handleModalOpen,
 }: {
   event: EventDetails;
+  location: string | null;
+  postcodeCoords?: LatLngExpression;
   handleModalOpen: (eventID: string) => void;
 }) {
+  const distanceInMiles =  location && calculateDistanceInMiles(postcodeCoords as number[], event.coordinates.latLng as number[]);
+  console.log(location, "distanceInMiles");
+
   return (
     <div
       aria-label="button"
@@ -25,7 +34,7 @@ export default function EventCard({
 
       <div className="border-y border-card-border py-2 my-2 flex justify-between text-sm text-mid-grey">
         <span>🕐 {event.time}</span>
-        <span>📍 {event.postcode} - 0.4 miles</span>
+        <span>📍 {!location && event.postcode} {location && (distanceInMiles as number)?.toFixed(1)} miles</span>
         <span>♿</span>
       </div>
 
