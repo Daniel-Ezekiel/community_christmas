@@ -7,7 +7,7 @@ import SearchForm from "../_components/SearchForm";
 export default function Header() {
   return (
     <header className="bg-navy text-white">
-      <div className="mx-auto max-w-7xl px-4 py-5 md:px-8 md:py-6">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
         <div className="flex flex-col items-center md:grid md:grid-cols-[8rem_1fr_8rem] md:items-center md:gap-6 lg:grid-cols-[9rem_1fr_9rem]">
           <Link href="/" className="w-28 shrink-0 md:w-32 lg:w-36">
             <Image
