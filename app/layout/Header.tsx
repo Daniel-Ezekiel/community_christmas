@@ -7,8 +7,8 @@ import SearchForm from "../_components/SearchForm";
 export default function Header() {
   return (
     <header className="bg-navy text-white">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 border-b border-white/15 px-4 py-3 md:px-8">
-        <Link href="/" className="w-24 shrink-0 md:w-28 lg:w-32">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 md:px-8 md:py-5">
+        <Link href="/" className="w-20 shrink-0 md:w-24 lg:w-28">
           <Image
             src={MarmaladeLogo}
             alt="Marmalade Trust"
@@ -17,13 +17,13 @@ export default function Header() {
         </Link>
         <a
           href="https://www.marmaladetrust.org/community-christmas"
-          className="inline-flex min-h-11 items-center rounded-pill border border-white/35 px-4 text-sm font-semibold text-white hover:bg-white/10"
+          className="py-2 text-base font-medium text-white hover:underline"
         >
           About Community Christmas
         </a>
       </nav>
 
-      <div className="mx-auto max-w-xl px-4 pt-4 pb-6 md:px-8 md:pt-5 md:pb-7">
+      <div className="mx-auto max-w-xl px-4 pt-3 pb-6 md:px-8 md:pt-4 md:pb-7">
         <h1 className="text-center text-2xl font-extrabold md:text-3xl lg:text-4xl">
           Community Christmas
         </h1>
