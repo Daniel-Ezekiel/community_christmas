@@ -26,7 +26,7 @@ export default function EventsMap({
   postcodeCoords,
   handleModalOpen,
   isForModal = false,
-  height = "475px"
+  height = "360px"
 }: {
   position: LatLngExpression;
   zoom?: number;
@@ -45,7 +45,8 @@ export default function EventsMap({
         center={position}
         zoom={zoom}
         scrollWheelZoom={false}
-        style={{ minHeight: height, width: "100%" }}
+        className={isForModal ? undefined : "h-[200px] md:h-[360px]"}
+        style={{ minHeight: isForModal ? height : undefined, width: "100%" }}
         attributionControl={false}
         ref={(map) => {
           if (map && mapRef.current && mapRef.current !== map) {
@@ -62,16 +63,18 @@ export default function EventsMap({
         {events.map((eventData) => (
           <Marker key={eventData.id} position={eventData.coordinates.latLng}>
             {!isForModal && (
-              <Popup>
+              <Popup
+                className="event-map-popup"
+                minWidth={320}
+                maxWidth={320}
+                closeButton
+              >
                 <EventCard
                   event={eventData}
                   location={location}
                   postcodeCoords={postcodeCoords}
-                  handleModalOpen={([_id]: string[] | string) => {
-                    // Accepts an eventID param to match EventCard's signature,
-                    // but uses the current marker's id when opening the modal.
-                    if (handleModalOpen) handleModalOpen(eventData.id);
-                  }}
+                  handleModalOpen={(id) => handleModalOpen?.(id)}
+                  className="rounded-none border-0 hover:bg-hover-tint [&>div:first-child]:pr-6"
                 />
               </Popup>
             )}

@@ -2,12 +2,11 @@
 
 import { useEffect, useId, useRef } from "react";
 import dynamic from "next/dynamic";
-import { ArrowLeft, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, X } from "lucide-react";
 import { EventDetails } from "@/types";
 import { LatLngExpression } from "leaflet";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
 import { isAccessibleEvent, isFreeEvent } from "@/app/_utils/eventFilters";
-import FilterPill from "../FilterPill";
 
 const EventsMap = dynamic(
   () => import("@/app/_components/homepage/EventsMap"),
@@ -17,6 +16,28 @@ const EventsMap = dynamic(
 function contactParts(contactPublic: string) {
   const [phone, email] = contactPublic.split("\n").map((part) => part.trim());
   return { phone, email };
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-sm font-semibold tracking-wide text-navy uppercase">
+        {label}
+      </dt>
+      <dd className="mt-1 text-navy">{value}</dd>
+    </div>
+  );
+}
+
+function DetailCard({ label, value }: { label: string; value: string }) {
+  return (
+    <section className="rounded-card border border-card-border bg-off-white p-4">
+      <h3 className="text-sm font-semibold tracking-wide text-navy uppercase">
+        {label}
+      </h3>
+      <p className="mt-1 text-navy">{value}</p>
+    </section>
+  );
 }
 
 export default function EventModal({
@@ -42,10 +63,10 @@ export default function EventModal({
   const destination = Array.isArray(event.coordinates.latLng)
     ? (event.coordinates.latLng as number[])
     : null;
-  const distanceLabel =
-    location && origin && destination
-      ? `${calculateDistanceInMiles(origin, destination).toFixed(1)} miles away`
-      : event.postcode;
+  const hasDistance = Boolean(location && origin && destination);
+  const distanceLabel = hasDistance
+    ? `${calculateDistanceInMiles(origin as number[], destination as number[]).toFixed(1)} miles away`
+    : event.postcode;
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -93,55 +114,82 @@ export default function EventModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex h-dvh w-full max-w-3xl flex-col overflow-y-auto bg-off-white md:h-[min(90dvh,900px)] md:rounded-card"
-        onClick={(event) => event.stopPropagation()}
+        className="flex h-dvh w-full max-w-3xl flex-col bg-white md:h-[min(90dvh,880px)] md:rounded-card"
+        onClick={(clickEvent) => clickEvent.stopPropagation()}
       >
-        <header className="relative bg-navy px-4 py-6 text-white md:px-10">
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            className="inline-flex min-h-11 items-center gap-2 font-bold text-sage"
-          >
-            <ArrowLeft size={20} aria-hidden />
-            Back to results
-          </button>
-          <h2
-            id={titleId}
-            className="mt-4 text-center text-2xl font-extrabold lg:text-4xl"
-          >
-            {event.eventName}
-          </h2>
-          <div className="mt-4 flex flex-wrap justify-center gap-3">
-            {free ? (
-              <FilterPill filterName="Free" selected />
-            ) : (
-              <FilterPill filterName="Paid" selected />
-            )}
+        <header className="sticky top-0 z-10 shrink-0 bg-navy px-4 py-4 text-white md:px-8">
+          <div className="grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-2">
+            <span aria-hidden />
+            <h2
+              id={titleId}
+              className="text-center text-xl font-extrabold md:text-2xl"
+            >
+              {event.eventName}
+            </h2>
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="inline-flex size-11 cursor-pointer items-center justify-center justify-self-end rounded-full text-white hover:bg-white/10"
+            >
+              <X size={22} />
+            </button>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+          <p className="text-center text-sm font-semibold tracking-wide text-sage uppercase">
+            Hosted by {event.organisation}
+          </p>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <span
+              className={
+                free
+                  ? "rounded-pill bg-free-fill px-3 py-1 text-sm font-semibold text-free-text"
+                  : "rounded-pill bg-paid-fill px-3 py-1 text-sm font-semibold text-amber-dark"
+              }
+            >
+              {free ? "Free" : "Paid"}
+            </span>
             {accessible ? (
-              <span className="inline-flex min-h-11 items-center rounded-pill border border-white/40 px-3 text-sm font-medium text-white">
+              <span className="rounded-pill bg-access-fill px-3 py-1 text-sm font-semibold text-access-text">
                 Accessible
               </span>
             ) : null}
           </div>
-        </header>
 
-        <div className="flex flex-col gap-6 px-4 py-8 md:px-10">
-          <p className="text-sm font-bold tracking-wide text-sage uppercase">
-            Hosted by {event.organisation}
-          </p>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="flex gap-2 text-navy">
-              <MapPin className="mt-1 shrink-0 text-sage" aria-hidden />
-              <div>
-                <h3 className="font-bold">{event.venueName}</h3>
-                <p>
-                  {event.address}, {event.city}, {event.postcode}
-                </p>
+          <div className="mt-6 grid items-start gap-4 md:grid-cols-2">
+            <div>
+              <div className="flex gap-2 text-navy">
+                <MapPin className="mt-1 shrink-0 text-sage" aria-hidden />
+                <div>
+                  <h3 className="font-semibold">{event.venueName}</h3>
+                  <p>
+                    {event.address}, {event.city}, {event.postcode}
+                  </p>
+                </div>
               </div>
+
+              <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4">
+                <Fact
+                  label="Date"
+                  value={
+                    event.isChristmasDay === "Yes"
+                      ? "Christmas Day, 25 December"
+                      : event.lastUpdated
+                  }
+                />
+                <Fact label="Time" value={event.time} />
+                <Fact label="Event type" value={event.eventType} />
+                <Fact
+                  label={hasDistance ? "Distance" : "Postcode"}
+                  value={distanceLabel}
+                />
+              </dl>
             </div>
-            <div className="overflow-hidden rounded-chip">
+
+            <div className="overflow-hidden rounded-card">
               <EventsMap
                 events={[event]}
                 location={location}
@@ -149,59 +197,29 @@ export default function EventModal({
                 position={event.coordinates.latLng}
                 zoom={16}
                 isForModal
-                height="220px"
+                height="180px"
               />
             </div>
           </div>
 
-          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="font-bold text-navy uppercase">Date</dt>
-              <dd>
-                {event.isChristmasDay === "Yes"
-                  ? "Christmas Day, 25 December"
-                  : event.lastUpdated}
-              </dd>
-            </div>
-            <div>
-              <dt className="font-bold text-navy uppercase">Time</dt>
-              <dd>{event.time}</dd>
-            </div>
-            <div>
-              <dt className="font-bold text-navy uppercase">Event type</dt>
-              <dd>{event.eventType}</dd>
-            </div>
-            <div>
-              <dt className="font-bold text-navy uppercase">Distance</dt>
-              <dd>{distanceLabel}</dd>
-            </div>
-          </dl>
-
-          <section>
-            <h3 className="font-bold text-navy uppercase">About this event</h3>
+          <section className="mt-6">
+            <h3 className="text-sm font-semibold tracking-wide text-navy uppercase">
+              About this event
+            </h3>
             <p className="mt-1 text-navy">{event.description}</p>
           </section>
 
-          <section className="rounded-chip bg-light-sage p-4">
-            <h3 className="font-bold text-navy uppercase">Accessibility</h3>
-            <p className="mt-1 text-navy">{event.accessibility}</p>
-          </section>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <DetailCard label="Accessibility" value={event.accessibility} />
+            <DetailCard label="Cost" value={event.cost} />
+            <DetailCard label="Booking" value={event.bookingRequired} />
+          </div>
 
-          <section>
-            <h3 className="font-bold text-navy uppercase">Cost</h3>
-            <p className="mt-1 text-navy">{event.cost}</p>
-          </section>
-
-          <section className="rounded-chip bg-warning-fill p-4">
-            <h3 className="font-bold text-navy uppercase">Booking</h3>
-            <p className="mt-1 text-navy">{event.bookingRequired}</p>
-          </section>
-
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {phone ? (
               <a
                 href={`tel:${phone.replace(/\s/g, "")}`}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-chip border border-sage font-bold text-navy"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-pill border border-sage font-semibold text-navy hover:border-navy hover:bg-hover-tint"
               >
                 <Phone size={18} aria-hidden />
                 {phone}
@@ -210,7 +228,7 @@ export default function EventModal({
             {email ? (
               <a
                 href={`mailto:${email}`}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-chip border border-sage font-bold text-navy"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-pill border border-sage font-semibold text-navy hover:border-navy hover:bg-hover-tint"
               >
                 <Mail size={18} aria-hidden />
                 Email
@@ -218,7 +236,7 @@ export default function EventModal({
             ) : null}
           </div>
 
-          <p className="text-center text-sm text-mid-grey">
+          <p className="mt-4 mb-2 text-center text-sm text-mid-grey">
             You will be contacting {event.organisation} directly.
           </p>
         </div>
