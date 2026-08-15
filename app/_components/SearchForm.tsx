@@ -24,7 +24,7 @@ export default function SearchForm() {
   const [distance, setDistance] = useState(initialDistance);
 
   return (
-    <form action="/" method="GET" className="relative mx-auto mt-4 w-full md:mt-5">
+    <form action="/" method="GET" className="relative mx-auto mt-3 w-full md:mt-4">
       <div className="flex h-12 min-h-12 w-full items-center rounded-full bg-white py-1 pl-4 pr-1">
         <label htmlFor="location" className="sr-only">
           Enter postcode or town
