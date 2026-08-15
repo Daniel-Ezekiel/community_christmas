@@ -7,41 +7,44 @@ import SearchForm from "../_components/SearchForm";
 
 export default function Header() {
   return (
-    <header className="overflow-hidden bg-navy text-white">
-      <nav className="relative mx-auto max-w-7xl px-4 py-5 md:px-8 md:py-8">
-        <div className="flex flex-col items-center md:grid md:grid-cols-[1fr_minmax(0,40rem)_1fr] md:items-start md:gap-8">
-          <Link href="/" className="w-24 shrink-0 md:w-32 md:justify-self-end lg:w-36">
-            <Image
-              src={MarmaladeLogo}
-              alt="Marmalade Trust"
-              className="h-auto w-full"
-            />
-          </Link>
-
-          <div className="mt-4 w-full md:mt-0 md:py-4">
-            <h1 className="text-center text-2xl font-extrabold md:text-4xl lg:text-5xl">
-              Community Christmas
-            </h1>
-            <p className="mx-auto mt-2 max-w-xl text-center text-sm font-normal md:mt-3 md:text-lg">
-              No one should have to spend Christmas Day alone. Find a warm
-              welcome near you.
-            </p>
-            <Suspense
-              fallback={
-                <div className="mx-auto mt-4 h-12 max-w-xl rounded-full bg-white/15" />
-              }
-            >
-              <SearchForm />
-            </Suspense>
-          </div>
-
+    <header className="bg-navy text-white">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
+        <Link href="/" className="w-16 shrink-0 md:w-20">
           <Image
-            src={ChristmasIllustration}
-            alt=""
-            className="hidden w-44 justify-self-end object-contain object-top md:block md:-mt-8 lg:w-56"
+            src={MarmaladeLogo}
+            alt="Marmalade Trust"
+            className="h-auto w-full"
           />
-        </div>
+        </Link>
+        <a
+          href="https://www.marmaladetrust.org/community-christmas"
+          className="text-sm font-semibold text-white/90 hover:text-white hover:underline"
+        >
+          About Community Christmas
+        </a>
       </nav>
+
+      <div className="relative mx-auto max-w-xl px-4 pb-6 pt-2 md:px-8 md:pb-8">
+        <Image
+          src={ChristmasIllustration}
+          alt=""
+          className="pointer-events-none absolute -top-6 right-0 hidden w-36 opacity-25 md:block lg:w-44"
+        />
+        <h1 className="relative text-center text-2xl font-extrabold md:text-3xl lg:text-4xl">
+          Community Christmas
+        </h1>
+        <p className="relative mx-auto mt-2 max-w-xl text-center text-base font-normal md:mt-3 md:text-lg">
+          No one should have to spend Christmas Day alone. Find a warm welcome
+          near you.
+        </p>
+        <Suspense
+          fallback={
+            <div className="relative mx-auto mt-4 h-12 rounded-full bg-white/15" />
+          }
+        >
+          <SearchForm />
+        </Suspense>
+      </div>
     </header>
   );
 }
