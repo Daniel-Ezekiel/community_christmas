@@ -1,5 +1,6 @@
 import { Accessibility, Clock, MapPin } from "lucide-react";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
+import { cn } from "@/app/_utils/cn";
 import { isAccessibleEvent, isFreeEvent } from "@/app/_utils/eventFilters";
 import { EventDetails } from "@/types";
 import { LatLngExpression } from "leaflet";
@@ -18,11 +19,13 @@ export default function EventCard({
   location,
   postcodeCoords,
   handleModalOpen,
+  className,
 }: {
   event: EventDetails;
   location: string | null;
   postcodeCoords?: LatLngExpression;
   handleModalOpen: (eventID: string) => void;
+  className?: string;
 }) {
   const origin = asLatLng(postcodeCoords);
   const destination = asLatLng(event.coordinates.latLng);
@@ -37,15 +40,18 @@ export default function EventCard({
     <button
       type="button"
       onClick={() => handleModalOpen(event.id)}
-      className="w-full rounded-card border border-card-border bg-white p-4 text-left cursor-pointer hover:bg-hover-tint"
+      className={cn(
+        "w-full rounded-card border border-card-border bg-white p-4 text-left cursor-pointer hover:bg-hover-tint",
+        className,
+      )}
     >
       <div className="mb-3 grid grid-cols-[1fr_auto] items-start gap-3">
-        <h3 className="font-semibold text-navy md:min-h-14">{event.eventName}</h3>
+        <h3 className="font-semibold text-navy">{event.eventName}</h3>
         <span
           className={
             free
-              ? "rounded-pill bg-free-fill px-3 py-1 text-sm font-semibold text-free-text"
-              : "rounded-pill bg-paid-fill px-3 py-1 text-sm font-semibold text-amber-dark"
+              ? "rounded-pill bg-free-fill px-2 py-0.5 text-xs font-semibold text-free-text md:px-3 md:py-1 md:text-sm"
+              : "rounded-pill bg-paid-fill px-2 py-0.5 text-xs font-semibold text-amber-dark md:px-3 md:py-1 md:text-sm"
           }
         >
           {free ? "Free" : "Paid"}
@@ -60,7 +66,7 @@ export default function EventCard({
         <span className="inline-flex items-center gap-1">
           <MapPin size={16} aria-hidden />
           {distanceInMiles != null
-            ? `${distanceInMiles.toFixed(1)} miles`
+            ? `${distanceInMiles.toFixed(1)} miles away`
             : event.postcode}
         </span>
         {accessible ? (

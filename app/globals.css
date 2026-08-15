@@ -140,5 +140,48 @@ html {
 body {
   font-size: 1rem;
   line-height: 1.625; /* matches 16px / 26 line-height from type scale */
-  /* overflow: hidden; */
+}
+
+/* Leaflet popups should look like EventCard, not Leaflet's default chrome */
+.event-map-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(17 52 68 / 0.16);
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: var(--ink);
+}
+
+.event-map-popup .leaflet-popup-content {
+  margin: 0;
+  width: 20rem !important;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.event-map-popup .leaflet-popup-content p {
+  margin: 0;
+}
+
+.event-map-popup .leaflet-popup-tip {
+  background: var(--white);
+  box-shadow: none;
+}
+
+.event-map-popup a.leaflet-popup-close-button {
+  top: 10px;
+  right: 10px;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  color: var(--mid-grey);
+}
+
+.event-map-popup a.leaflet-popup-close-button:hover {
+  color: var(--navy);
 }
