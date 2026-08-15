@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import FilterPill from "../FilterPill";
 import EventCard from "./EventCard";
 import EmptyState from "./EmptyState";
+import EventModal from "./EventModal";
 import ViewToggle from "../ViewToggle";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -205,131 +206,13 @@ export default function Events() {
         )}
       </section>
 
-      {selectedEvent ? (
-        <section
-          className={`${isModalOpen ? "fixed top-0 left-0 z-1000" : "hidden"} grid h-dvh w-dvw place-items-center bg-off-white/45 backdrop-blur-sm`}
-        >
-          <div className="mx-auto h-dvh max-w-270 overflow-scroll bg-off-white">
-            <div className="grid gap-4 bg-navy p-4 py-6">
-              <button
-                onClick={handleModalClose}
-                className="flex cursor-pointer items-center gap-2 text-lg font-bold text-sage lg:text-xl"
-              >
-                <ArrowLeft />
-                Back to Results
-              </button>
-              <h3 className="text-center text-2xl font-extrabold text-white lg:text-4xl">
-                {selectedEvent.eventName}
-              </h3>
-              <div className="flex items-center justify-center gap-4">
-                <FilterPill filterName="Free" />
-                <FilterPill filterName="Accessible" />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-6 p-4 py-8 md:grid md:gap-4 md:px-10 lg:grid-cols-9 lg:px-12">
-              <h4 className="col-span-full text-lg font-bold text-sage uppercase md:text-xl">
-                Hosted by {selectedEvent.organisation}
-              </h4>
-
-              <div className="grid gap-3 lg:col-span-4 lg:grid-cols-2">
-                <div className="grid grid-cols-[auto_1fr] gap-x-2 text-lg md:text-xl lg:col-span-full">
-                  <MapPin className="self-end text-sage" />
-                  <h5 className="col-start-2 self-end font-bold text-navy">
-                    {selectedEvent.venueName}
-                  </h5>
-                  <p className="col-start-2">
-                    {selectedEvent.address}, {selectedEvent.city},{" "}
-                    {selectedEvent.postcode}
-                  </p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">Date</h5>
-                  <p>
-                    {selectedEvent.isChristmasDay === "Yes"
-                      ? "Christmas Day, 25 December"
-                      : selectedEvent.lastUpdated}
-                  </p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">Time</h5>
-                  <p>{selectedEvent.time}</p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">Event Type</h5>
-                  <p>{selectedEvent.eventType}</p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">Distance</h5>
-                  <p>
-                    {location && postcodeCoordinates
-                      ? `${calculateDistanceInMiles(
-                          postcodeCoordinates as number[],
-                          selectedEvent.coordinates.latLng as number[],
-                        ).toFixed(1)} miles`
-                      : selectedEvent.postcode}
-                  </p>
-                </div>
-              </div>
-
-              <div className="overflow-hidden rounded-chip lg:col-span-5 lg:col-start-5 lg:row-start-2">
-                <EventsMap
-                  events={[selectedEvent]}
-                  location={location}
-                  postcodeCoords={postcodeCoordinates as LatLngExpression}
-                  position={selectedEvent.coordinates.latLng}
-                  zoom={20}
-                  isForModal={true}
-                  height="300px"
-                />
-              </div>
-
-              <div className="col-span-full text-lg text-navy md:text-xl">
-                <h5 className="font-bold uppercase">About this Event</h5>
-                <p>{selectedEvent.description}</p>
-              </div>
-
-              <div className="col-span-full rounded-chip bg-light-sage p-4 text-lg text-navy md:text-xl">
-                <h5 className="mb-4 font-bold uppercase">Accessibility</h5>
-                <p>{selectedEvent.accessibility}</p>
-              </div>
-
-              <div className="col-span-full text-lg text-navy md:text-xl">
-                <h5 className="font-bold uppercase">Cost</h5>
-                <span>{selectedEvent.cost}</span>
-              </div>
-
-              <div className="col-span-full text-lg text-navy md:text-xl">
-                <div className="rounded-chip bg-warning-fill p-4 text-lg text-navy md:text-xl">
-                  <h5 className="font-bold uppercase">Booking</h5>
-                  <span>{selectedEvent.bookingRequired}</span>
-                </div>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    className="rounded-chip border border-sage p-4 text-lg font-bold text-navy lg:text-xl"
-                  >
-                    {selectedEvent.contactPublic.split("\n")[0]}
-                  </Button>
-
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    className="rounded-chip border border-sage p-4 text-lg font-bold text-navy lg:text-xl"
-                  >
-                    {selectedEvent.contactPublic.split("\n")[1]}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      {selectedEvent && isModalOpen ? (
+        <EventModal
+          event={selectedEvent}
+          location={location}
+          postcodeCoords={postcodeCoordinates as LatLngExpression}
+          onClose={handleModalClose}
+        />
       ) : null}
     </div>
   );
