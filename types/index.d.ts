@@ -4,7 +4,7 @@
 
 import { LatLngExpression } from "leaflet";
 
-interface EventDetails {
+export interface EventDetails {
   id: string;
   eventName: string;
   organisation: string;
@@ -30,12 +30,12 @@ interface EventDetails {
   lastUpdated: string;
 }
 
-interface EventsApiResponse {
+export interface EventsApiResponse {
   success: boolean;
   count: number;
   events: EventDetails[];
 }
 
-interface ApiErrorResponse {
+export interface ApiErrorResponse {
   error: string;
 }
