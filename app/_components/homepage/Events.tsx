@@ -2,6 +2,7 @@
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import FilterPill from "../FilterPill";
+import MobileFilterBar from "../MobileFilterBar";
 import EventCard from "./EventCard";
 import EmptyState from "./EmptyState";
 import EventModal from "./EventModal";
@@ -16,8 +17,8 @@ import { getPostcodeDetails } from "@/app/_utils/getPostcodeDetails";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
 import {
   EVENT_FILTERS,
-  EventFilterId,
   filterEvents,
+  SelectableEventFilterId,
 } from "@/app/_utils/eventFilters";
 import { LatLngExpression } from "leaflet";
 
@@ -40,8 +41,10 @@ export default function Events() {
   const location = searchParams.get("location");
   const distance = searchParams.get("distance");
 
-  const [view, setView] = useState<"map" | "list">("map");
-  const [activeFilter, setActiveFilter] = useState<EventFilterId>("all");
+  const [view, setView] = useState<"map" | "list">("list");
+  const [selectedFilters, setSelectedFilters] = useState<
+    SelectableEventFilterId[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadingPostcodeDetails, setIsLoadingPostcodeDetails] = useState(
     Boolean(location),
@@ -57,6 +60,12 @@ export default function Events() {
   });
 
   const allEventsData: EventDetails[] = data?.events || [];
+
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      setView("map");
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -100,10 +109,19 @@ export default function Events() {
         })
       : allEventsData;
 
-  const eventsData = filterEvents(nearbyEvents, activeFilter);
+  const eventsData = filterEvents(nearbyEvents, selectedFilters);
 
-  const handleFilterChange = (filter: EventFilterId) => {
-    setActiveFilter(filter);
+  const handleToggleFilter = (filter: SelectableEventFilterId) => {
+    setSelectedFilters((current) =>
+      current.includes(filter)
+        ? current.filter((id) => id !== filter)
+        : [...current, filter],
+    );
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedFilters([]);
     setCurrentPage(1);
   };
 
@@ -134,24 +152,45 @@ export default function Events() {
     : `${eventsData.length} events across the UK`;
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <section className="grid gap-4 sm:grid-cols-2 sm:items-center">
-        <div className="flex w-full gap-3 overflow-x-auto py-2 sm:col-span-full">
-          {EVENT_FILTERS.map((option) => (
-            <FilterPill
-              key={option.id}
-              filterName={option.label}
-              selected={activeFilter === option.id}
-              onClick={() => handleFilterChange(option.id)}
-            />
-          ))}
+    <div className="mx-auto max-w-7xl">
+      <section className="grid gap-4">
+        <MobileFilterBar
+          selected={selectedFilters}
+          onToggle={handleToggleFilter}
+          onClear={handleClearFilters}
+        />
+
+        <div className="relative hidden md:block">
+          <div className="flex w-full gap-2 overflow-x-auto py-2 pr-8">
+            {EVENT_FILTERS.map((option) => (
+              <FilterPill
+                key={option.id}
+                filterName={option.label}
+                selected={
+                  option.id === "all"
+                    ? selectedFilters.length === 0
+                    : selectedFilters.includes(option.id)
+                }
+                onClick={() =>
+                  option.id === "all"
+                    ? handleClearFilters()
+                    : handleToggleFilter(option.id)
+                }
+              />
+            ))}
+          </div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-off-white"
+          />
         </div>
 
-        <h2 className="text-lg font-semibold text-navy md:text-xl lg:py-4 lg:text-2xl lg:font-bold">
-          {resultsHeading}
-        </h2>
-
-        <ViewToggle value={view} onChange={setView} />
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="min-w-0 flex-1 truncate text-lg font-semibold text-navy md:text-xl lg:text-2xl lg:font-bold">
+            {resultsHeading}
+          </h2>
+          <ViewToggle value={view} onChange={setView} className="shrink-0" />
+        </div>
 
         {eventsData.length > 0 && view === "map" ? (
           <div className="col-span-full overflow-hidden rounded-card">
@@ -167,7 +206,7 @@ export default function Events() {
         ) : null}
       </section>
 
-      <section className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {eventsData.length > 0 ? (
           <>
             {eventsData

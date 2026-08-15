@@ -18,13 +18,16 @@ export default function FilterPill({
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-11 min-w-max items-center gap-1 rounded-pill border px-3 text-sm font-medium transition-colors cursor-pointer",
+        "inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-pill border font-medium transition-colors",
+        "min-h-8 px-2.5 text-xs md:min-h-11 md:px-3 md:text-sm",
         selected
           ? "border-navy bg-light-sage text-navy"
           : "border-card-border bg-white text-navy hover:bg-hover-tint",
       )}
     >
-      {selected ? <Check size={14} aria-hidden /> : null}
+      {selected ? (
+        <Check size={12} aria-hidden className="md:size-3.5" />
+      ) : null}
       {filterName}
     </button>
   );
