@@ -15,8 +15,8 @@ export default function ViewToggle({
   className?: string;
 }) {
   const options: { id: ViewMode; label: string; icon: typeof Map }[] = [
-    { id: "map", label: "Map", icon: Map },
     { id: "list", label: "List", icon: List },
+    { id: "map", label: "Map", icon: Map },
   ];
 
   return (

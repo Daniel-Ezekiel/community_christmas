@@ -17,10 +17,30 @@ import { getPostcodeDetails } from "@/app/_utils/getPostcodeDetails";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
 import {
   EVENT_FILTERS,
+  EventFilterId,
   filterEvents,
   SelectableEventFilterId,
 } from "@/app/_utils/eventFilters";
 import { LatLngExpression } from "leaflet";
+
+function formatEventCount(count: number) {
+  return `${count} ${count === 1 ? "event" : "events"}`;
+}
+
+function getResultsHeading(
+  count: number,
+  location: string | null,
+  distance: string | null,
+  searchedNearby: boolean,
+) {
+  if (searchedNearby && location && distance) {
+    return `${formatEventCount(count)} within ${distance} miles of ${location}`;
+  }
+  if (location) {
+    return `${formatEventCount(count)} near ${location}`;
+  }
+  return `${formatEventCount(count)} across the UK`;
+}
 
 const EventsMap = dynamic(
   () => import("@/app/_components/homepage/EventsMap"),
@@ -60,12 +80,6 @@ export default function Events() {
   });
 
   const allEventsData: EventDetails[] = data?.events || [];
-
-  useEffect(() => {
-    if (window.matchMedia("(min-width: 768px)").matches) {
-      setView("map");
-    }
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -108,21 +122,33 @@ export default function Events() {
           );
         })
       : allEventsData;
+  const searchedNearby = Boolean(location && distance && postcodeCoordinates);
 
   const eventsData = filterEvents(nearbyEvents, selectedFilters);
 
-  const handleToggleFilter = (filter: SelectableEventFilterId) => {
+  const allEventsSelected = selectedFilters.length === 0;
+
+  const handleFilterClick = (id: EventFilterId) => {
+    if (id === "all") {
+      setSelectedFilters([]);
+      setCurrentPage(1);
+      return;
+    }
+
     setSelectedFilters((current) =>
-      current.includes(filter)
-        ? current.filter((id) => id !== filter)
-        : [...current, filter],
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
     );
     setCurrentPage(1);
   };
 
+  const handleToggleFilter = (filter: SelectableEventFilterId) => {
+    handleFilterClick(filter);
+  };
+
   const handleClearFilters = () => {
-    setSelectedFilters([]);
-    setCurrentPage(1);
+    handleFilterClick("all");
   };
 
   const handleModalOpen = (eventID: string) => {
@@ -147,9 +173,12 @@ export default function Events() {
 
   if (error) return "An error has occurred: " + error.message;
 
-  const resultsHeading = location
-    ? `${eventsData.length} events near ${location}`
-    : `${eventsData.length} events across the UK`;
+  const resultsHeading = getResultsHeading(
+    eventsData.length,
+    location,
+    distance,
+    searchedNearby,
+  );
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -162,22 +191,21 @@ export default function Events() {
 
         <div className="relative hidden md:block">
           <div className="flex w-full gap-2 overflow-x-auto py-2 pr-8">
-            {EVENT_FILTERS.map((option) => (
-              <FilterPill
-                key={option.id}
-                filterName={option.label}
-                selected={
-                  option.id === "all"
-                    ? selectedFilters.length === 0
-                    : selectedFilters.includes(option.id)
-                }
-                onClick={() =>
-                  option.id === "all"
-                    ? handleClearFilters()
-                    : handleToggleFilter(option.id)
-                }
-              />
-            ))}
+            {EVENT_FILTERS.map((option) => {
+              const isAll = option.id === "all";
+              const isSelected = isAll
+                ? allEventsSelected
+                : selectedFilters.includes(option.id);
+
+              return (
+                <FilterPill
+                  key={option.id}
+                  filterName={option.label}
+                  selected={isSelected}
+                  onClick={() => handleFilterClick(option.id)}
+                />
+              );
+            })}
           </div>
           <div
             aria-hidden
@@ -222,21 +250,27 @@ export default function Events() {
               ))}
 
             {eventsData.length > 12 ? (
-              <div className="col-span-full mt-4 flex justify-center gap-4">
-                <Button
-                  onClick={() => setCurrentPage((page) => page - 1)}
-                  isDisabled={currentPage === 1}
-                  className="flex w-36 items-center justify-center gap-2 rounded-xl p-2 px-4"
-                >
-                  <ArrowLeft /> Previous
-                </Button>
-                <Button
-                  onClick={() => setCurrentPage((page) => page + 1)}
-                  isDisabled={currentPage * 12 >= eventsData.length}
-                  className="flex w-36 items-center justify-center gap-2 rounded-xl p-2 px-4"
-                >
-                  Next <ArrowRight />
-                </Button>
+              <div className="col-span-full mt-4 mb-10 border-t border-[#e5e7eb] pt-4">
+                <p className="text-center text-[14px] text-mid-grey">
+                  Showing {(currentPage - 1) * 12 + 1}–{Math.min(currentPage * 12, eventsData.length)} of {eventsData.length} events
+                </p>
+                <div className="mt-4 flex justify-center gap-4">
+                  {currentPage > 1 ? (
+                    <Button
+                      onClick={() => setCurrentPage((page) => page - 1)}
+                      className="flex w-36 items-center justify-center gap-2 rounded-xl p-2 px-4"
+                    >
+                      <ArrowLeft /> Previous
+                    </Button>
+                  ) : null}
+                  <Button
+                    onClick={() => setCurrentPage((page) => page + 1)}
+                    isDisabled={currentPage * 12 >= eventsData.length}
+                    className="flex w-36 items-center justify-center gap-2 rounded-xl p-2 px-4"
+                  >
+                    Next <ArrowRight />
+                  </Button>
+                </div>
               </div>
             ) : null}
           </>

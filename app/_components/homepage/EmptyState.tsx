@@ -18,7 +18,9 @@ export default function EmptyState({
         <div className="h-5 w-5 bg-navy rounded-full" />
       </div>
       <p className="text-lg font-semibold text-navy md:text-xl lg:text-2xl">
-        0 events near {location}
+        {distance
+          ? `0 events within ${distance} miles of ${location}`
+          : `0 events near ${location}`}
       </p>
       <p className="text-base text-mid-grey md:text-lg">
         Events are added all the way up to Christmas, so it&apos;s worth
