@@ -4,7 +4,7 @@ import MarmaladeLogo from "@/app/assets/images/Marmalade_Logo.png";
 
 export default function Footer() {
   return (
-    <footer className="bg-navy text-white">
+    <footer className="mt-auto shrink-0 bg-navy text-white">
       <div className="mx-auto max-w-3xl px-4 py-12 text-center md:px-8">
         <Image
           src={MarmaladeLogo}
