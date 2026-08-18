@@ -46,7 +46,27 @@ export default function EventCard({
       )}
     >
       <div className="mb-3 grid grid-cols-[1fr_auto] items-start gap-3">
-        <h3 className="font-semibold text-navy">{event.eventName}</h3>
+        <div className="min-w-0">
+          <h3 className="line-clamp-2 font-semibold text-navy">
+            {event.eventName}
+          </h3>
+          <div className="mt-1 grid grid-cols-[1rem_1fr] items-center gap-x-2 gap-y-1 text-sm">
+            <MapPin
+              size={16}
+              className="justify-self-center text-navy"
+              aria-hidden
+            />
+            <p className="min-w-0 truncate font-medium text-navy">
+              {[event.venueName, event.city].filter(Boolean).join(", ")}
+            </p>
+            <Clock
+              size={16}
+              className="justify-self-center text-mid-grey"
+              aria-hidden
+            />
+            <p className="text-mid-grey">{event.time}</p>
+          </div>
+        </div>
         <span
           className={
             free
@@ -58,29 +78,26 @@ export default function EventCard({
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-card-border py-2 text-sm text-mid-grey">
-        <span className="inline-flex items-center gap-1">
-          <Clock size={16} aria-hidden />
-          {event.time}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <MapPin size={16} aria-hidden />
-          {distanceInMiles != null
-            ? `${distanceInMiles.toFixed(1)} miles away`
-            : event.postcode}
-        </span>
-        {accessible ? (
-          <span className="inline-flex items-center text-access-text">
-            <Accessibility size={16} aria-label="Accessible venue" />
-          </span>
-        ) : null}
-      </div>
+      {distanceInMiles != null || accessible ? (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-card-border py-2 text-sm text-mid-grey">
+          {distanceInMiles != null ? (
+            <span className="inline-flex items-center gap-2">
+              <MapPin size={16} aria-hidden />
+              {distanceInMiles.toFixed(1)} miles away
+            </span>
+          ) : null}
+          {accessible ? (
+            <span className="inline-flex items-center text-access-text">
+              <Accessibility size={16} aria-label="Accessible venue" />
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-3 flex items-center justify-between gap-3 text-sm">
         <span className="max-w-[50%] truncate rounded-tag border border-card-border bg-off-white px-2 py-1 text-navy">
           {event.eventType}
         </span>
-        <span className="min-w-0 truncate text-mid-grey">{event.venueName}</span>
       </div>
     </button>
   );
