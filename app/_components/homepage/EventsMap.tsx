@@ -18,6 +18,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "/leaflet/marker-shadow.png",
 });
 
+const christmasMarker = L.divIcon({
+  className: "",
+  html: `
+    <svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#E8A020"/>
+      <circle cx="14" cy="14" r="6" fill="#fff" opacity="0.9"/>
+    </svg>
+  `,
+  iconSize: [28, 36],
+  iconAnchor: [14, 36],
+  popupAnchor: [0, -36],
+});
+
 export default function EventsMap({
   position,
   zoom,
@@ -61,7 +74,11 @@ export default function EventsMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {events.map((eventData) => (
-          <Marker key={eventData.id} position={eventData.coordinates.latLng}>
+          <Marker
+            key={eventData.id}
+            position={eventData.coordinates.latLng}
+            icon={christmasMarker}
+          >
             {!isForModal && (
               <Popup
                 className="event-map-popup"
