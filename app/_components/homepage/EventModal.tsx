@@ -2,11 +2,27 @@
 
 import { useEffect, useId, useRef } from "react";
 import dynamic from "next/dynamic";
-import { Mail, MapPin, Phone, X } from "lucide-react";
+import { Open_Sans } from "next/font/google";
+import {
+  Accessibility,
+  CalendarCheck,
+  Clock,
+  Mail,
+  MapPin,
+  Phone,
+  Tag,
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { EventDetails } from "@/types";
 import { LatLngExpression } from "leaflet";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
 import { isAccessibleEvent, isFreeEvent } from "@/app/_utils/eventFilters";
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
+});
 
 const EventsMap = dynamic(
   () => import("@/app/_components/homepage/EventsMap"),
@@ -21,21 +37,36 @@ function contactParts(contactPublic: string) {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-sm font-semibold tracking-wide text-navy uppercase">
-        {label}
-      </dt>
-      <dd className="mt-1 text-navy">{value}</dd>
+      <dt className="text-[12px] text-[#6b7280]">{label}</dt>
+      <dd className="mt-1 text-[16px] font-semibold text-[#1a2e3b]">{value}</dd>
     </div>
   );
 }
 
-function DetailCard({ label, value }: { label: string; value: string }) {
+function DetailCard({
+  label,
+  value,
+  icon: Icon,
+  tinted = false,
+}: {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  tinted?: boolean;
+}) {
   return (
-    <section className="rounded-card border border-card-border bg-off-white p-4">
-      <h3 className="text-sm font-semibold tracking-wide text-navy uppercase">
+    <section
+      className={
+        tinted
+          ? "rounded-card border border-card-border bg-[#e8f5e9] p-4"
+          : "rounded-card border border-card-border bg-off-white p-4"
+      }
+    >
+      <h3 className="flex items-center gap-2 text-[12px] font-normal text-[#6b7280]">
+        <Icon size={16} aria-hidden />
         {label}
       </h3>
-      <p className="mt-1 text-navy">{value}</p>
+      <p className="mt-1 text-[16px] font-semibold text-[#1a2e3b]">{value}</p>
     </section>
   );
 }
@@ -56,6 +87,10 @@ export default function EventModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const free = isFreeEvent(event);
   const accessible = isAccessibleEvent(event);
+  const hasDescription = Boolean(event.description?.trim());
+  const bookingNotRequired =
+    !/book/i.test(event.bookingRequired) ||
+    /no booking/i.test(event.bookingRequired);
   const { phone, email } = contactParts(event.contactPublic);
   const origin = Array.isArray(postcodeCoords)
     ? (postcodeCoords as number[])
@@ -66,7 +101,7 @@ export default function EventModal({
   const hasDistance = Boolean(location && origin && destination);
   const distanceLabel = hasDistance
     ? `${calculateDistanceInMiles(origin as number[], destination as number[]).toFixed(1)} miles away`
-    : event.postcode;
+    : "";
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
@@ -114,7 +149,7 @@ export default function EventModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex h-dvh w-full max-w-3xl flex-col bg-white md:h-[min(90dvh,880px)] md:rounded-card"
+        className={`${openSans.className} flex h-auto max-h-dvh w-full max-w-3xl flex-col overflow-y-auto bg-white text-[#1a2e3b] md:max-h-[min(90dvh,880px)] md:rounded-card`}
         onClick={(clickEvent) => clickEvent.stopPropagation()}
       >
         <header className="sticky top-0 z-10 shrink-0 bg-navy px-4 py-4 text-white md:px-8">
@@ -138,8 +173,8 @@ export default function EventModal({
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
-          <p className="text-center text-sm font-semibold tracking-wide text-sage uppercase">
+        <div className="px-4 py-6 md:px-8">
+          <p className="text-center text-sm font-semibold text-[#395460]">
             Hosted by {event.organisation}
           </p>
           <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -161,32 +196,33 @@ export default function EventModal({
 
           <div className="mt-6 grid items-start gap-4 md:grid-cols-2">
             <div>
-              <div className="flex gap-2 text-navy">
-                <MapPin className="mt-1 shrink-0 text-sage" aria-hidden />
+              <div className="grid grid-cols-[1.25rem_1fr] items-start gap-x-2 gap-y-3 text-[#1a2e3b]">
+                <MapPin
+                  size={20}
+                  className="mt-0.5 shrink-0 text-sage"
+                  aria-hidden
+                />
                 <div>
-                  <h3 className="font-semibold">{event.venueName}</h3>
-                  <p>
+                  <h3 className="font-semibold text-[#1a2e3b]">
+                    {event.venueName}
+                  </h3>
+                  <p className="text-[#1a2e3b]">
                     {event.address}, {event.city}, {event.postcode}
                   </p>
                 </div>
+                <Clock
+                  size={20}
+                  className="self-center shrink-0"
+                  aria-hidden
+                />
+                <span className="self-center">{event.time}</span>
               </div>
 
-              <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4">
-                <Fact
-                  label="Date"
-                  value={
-                    event.isChristmasDay === "Yes"
-                      ? "Christmas Day, 25 December"
-                      : event.lastUpdated
-                  }
-                />
-                <Fact label="Time" value={event.time} />
-                <Fact label="Event type" value={event.eventType} />
-                <Fact
-                  label={hasDistance ? "Distance" : "Postcode"}
-                  value={distanceLabel}
-                />
-              </dl>
+              {hasDistance ? (
+                <dl className="mt-3">
+                  <Fact label="Distance" value={distanceLabel} />
+                </dl>
+              ) : null}
             </div>
 
             <div className="overflow-hidden rounded-card">
@@ -202,17 +238,34 @@ export default function EventModal({
             </div>
           </div>
 
-          <section className="mt-6">
-            <h3 className="text-sm font-semibold tracking-wide text-navy uppercase">
-              About this event
-            </h3>
-            <p className="mt-1 text-navy">{event.description}</p>
-          </section>
+          {hasDescription ? (
+            <section className="mt-2">
+              <h3 className="text-[12px] font-normal text-[#6b7280]">
+                About this event
+              </h3>
+              <p className="mt-1 text-[#1a2e3b]">{event.description}</p>
+            </section>
+          ) : null}
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <DetailCard label="Accessibility" value={event.accessibility} />
-            <DetailCard label="Cost" value={event.cost} />
-            <DetailCard label="Booking" value={event.bookingRequired} />
+          <div className="mt-2 grid gap-3 sm:grid-cols-3">
+            <DetailCard
+              label="Accessibility"
+              value={event.accessibility}
+              icon={Accessibility}
+              tinted={accessible}
+            />
+            <DetailCard
+              label="Cost"
+              value={event.cost}
+              icon={Tag}
+              tinted={free}
+            />
+            <DetailCard
+              label="Booking"
+              value={event.bookingRequired}
+              icon={CalendarCheck}
+              tinted={bookingNotRequired}
+            />
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -236,7 +289,7 @@ export default function EventModal({
             ) : null}
           </div>
 
-          <p className="mt-4 mb-2 text-center text-sm text-mid-grey">
+          <p className="mt-4 mb-2 text-center text-sm text-[#6b7280]">
             You will be contacting {event.organisation} directly.
           </p>
         </div>
