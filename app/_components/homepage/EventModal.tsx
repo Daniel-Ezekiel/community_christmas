@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Open_Sans } from "next/font/google";
 import {
@@ -85,6 +85,8 @@ export default function EventModal({
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
   const free = isFreeEvent(event);
   const accessible = isAccessibleEvent(event);
   const hasDescription = Boolean(event.description?.trim());
@@ -103,6 +105,19 @@ export default function EventModal({
     ? `${calculateDistanceInMiles(origin as number[], destination as number[]).toFixed(1)} miles away`
     : "";
 
+  const requestClose = useCallback(() => {
+    if (closeTimerRef.current !== null) return;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduceMotion) {
+      onClose();
+      return;
+    }
+    setIsClosing(true);
+    closeTimerRef.current = window.setTimeout(onClose, 150);
+  }, [onClose]);
+
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
@@ -111,7 +126,7 @@ export default function EventModal({
 
     const onKeyDown = (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === "Escape") {
-        onClose();
+        requestClose();
         return;
       }
       if (keyboardEvent.key !== "Tab" || !panelRef.current) return;
@@ -137,19 +152,27 @@ export default function EventModal({
       document.removeEventListener("keydown", onKeyDown);
       previous?.focus();
     };
-  }, [onClose]);
+  }, [requestClose]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div
-      className="fixed inset-0 z-1000 grid place-items-end bg-navy/40 backdrop-blur-sm md:place-items-center"
-      onClick={onClose}
+      className={`modal-overlay fixed inset-0 z-1000 grid place-items-center bg-navy/40 p-4${isClosing ? " is-closing" : ""}`}
+      onClick={requestClose}
     >
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`${openSans.className} flex h-auto max-h-dvh w-full max-w-3xl flex-col overflow-y-auto bg-white text-[#1a2e3b] md:max-h-[min(90dvh,880px)] md:rounded-card`}
+        className={`${openSans.className} modal-panel flex h-auto max-h-[min(90dvh,880px)] w-full max-w-3xl flex-col overflow-y-auto rounded-card bg-white text-[#1a2e3b]`}
         onClick={(clickEvent) => clickEvent.stopPropagation()}
       >
         <header className="sticky top-0 z-10 shrink-0 bg-navy px-4 py-4 text-white md:px-8">
@@ -164,7 +187,7 @@ export default function EventModal({
             <button
               ref={closeRef}
               type="button"
-              onClick={onClose}
+              onClick={requestClose}
               aria-label="Close"
               className="inline-flex size-11 cursor-pointer items-center justify-center justify-self-end rounded-full text-white hover:bg-white/10"
             >

@@ -1,12 +1,26 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MarmaladeLogo from "@/app/assets/images/Marmalade_Logo.png";
 import SearchForm from "../_components/SearchForm";
 
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 0);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="bg-navy text-white">
+    <header className={scrolled ? "site-header is-scrolled bg-navy text-white" : "site-header bg-navy text-white"}>
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
         <div className="flex flex-col items-center md:grid md:grid-cols-[8rem_1fr_8rem] md:items-center md:gap-6 lg:grid-cols-[9rem_1fr_9rem]">
           <Link href="/" className="w-28 shrink-0 md:w-32 lg:w-36">

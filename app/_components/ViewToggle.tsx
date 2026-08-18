@@ -52,7 +52,7 @@ export default function ViewToggle({
               aria-pressed={selected}
               onClick={() => onChange(id)}
               className={cn(
-                "flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-pill px-3 font-semibold transition-colors",
+                "flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-pill px-3 font-semibold",
                 selected ? "bg-navy text-white" : "bg-white text-navy",
               )}
             >
