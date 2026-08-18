@@ -1,18 +1,118 @@
-const apiURL: string = process.env.API_URL || "";
+import type { EventDetails } from "@/types";
+
+// Dummy events for the princek64 fork preview deploy only.
+// Do not merge this into Daniel-Ezekiel/community_christmas.
+
+const mockEvents: EventDetails[] = [
+  {
+    id: "1",
+    eventName: "Test Christmas Lunch",
+    organisation: "Marmalade Trust",
+    venueName: "Watershed",
+    postcode: "BS1 4DJ",
+    coordinates: {
+      isTerminated: false,
+      latLng: [51.4545, -2.5879],
+    },
+    city: "Bristol",
+    address: "1 Canon's Road",
+    eventType: "Lunch",
+    description: "A test event for local dev in Bristol.",
+    isChristmasDay: "Yes",
+    time: "12:00 – 14:00",
+    openToAll: "Yes",
+    bookingRequired: "Booking required",
+    cost: "Free",
+    accessibility: "Step-free access and accessible toilets.",
+    spacesStatus: "Spaces left",
+    contactPublic: "0117 000 0000\nbristol@example.org",
+    mapDescription: "Watershed, Bristol Harbourside",
+    lastUpdated: "2026-08-15",
+  },
+  {
+    id: "2",
+    eventName: "Glasgow Christmas Gathering",
+    organisation: "Community Hub Glasgow",
+    venueName: "The Lighthouse",
+    postcode: "G1 3HL",
+    coordinates: {
+      isTerminated: false,
+      latLng: [55.8596, -4.2555],
+    },
+    city: "Glasgow",
+    address: "11 Mitchell Lane",
+    eventType: "Activity",
+    description: "A test gathering so the map has a Scotland pin.",
+    isChristmasDay: "Yes",
+    time: "14:00 – 17:00",
+    openToAll: "Yes",
+    bookingRequired: "No booking needed",
+    cost: "Free",
+    accessibility: "Lift access to all floors.",
+    spacesStatus: "Spaces left",
+    contactPublic: "0141 000 0000\nglasgow@example.org",
+    mapDescription: "The Lighthouse, Glasgow",
+    lastUpdated: "2026-08-15",
+  },
+  {
+    id: "3",
+    eventName: "Edinburgh Christmas Dinner",
+    organisation: "Volunteer Edinburgh",
+    venueName: "Assembly Rooms",
+    postcode: "EH2 2LR",
+    coordinates: {
+      isTerminated: false,
+      latLng: [55.9526, -3.1995],
+    },
+    city: "Edinburgh",
+    address: "54 George Street",
+    eventType: "Dinner",
+    description: "A test dinner event for the map and event modal.",
+    isChristmasDay: "Yes",
+    time: "17:00 – 20:00",
+    openToAll: "Yes",
+    bookingRequired: "Booking required",
+    cost: "Free",
+    accessibility: "Accessible entrance on George Street.",
+    spacesStatus: "Spaces left",
+    contactPublic: "0131 000 0000\nedinburgh@example.org",
+    mapDescription: "Assembly Rooms, Edinburgh",
+    lastUpdated: "2026-08-15",
+  },
+  {
+    id: "4",
+    eventName: "Edinburgh Christmas Lunch",
+    organisation: "Volunteer Edinburgh",
+    venueName: "Assembly Rooms",
+    postcode: "EH2 2LR",
+    coordinates: {
+      isTerminated: false,
+      latLng: [55.1526, -3.3995],
+    },
+    city: "Edinburgh",
+    address: "54 George Street",
+    eventType: "Dinner",
+    description: "A test dinner event for the map and event modal.",
+    isChristmasDay: "Yes",
+    time: "17:00 – 20:00",
+    openToAll: "Yes",
+    bookingRequired: "Booking required",
+    cost: "Free",
+    accessibility: "Accessible entrance on George Street.",
+    spacesStatus: "Spaces left",
+    contactPublic: "0131 000 0000\nedinburgh@example.org",
+    mapDescription: "Assembly Rooms, Edinburgh",
+    lastUpdated: "2026-08-15",
+  },
+];
 
 export async function GET() {
-  try {
-    const res = await fetch(apiURL);
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch data");
-    }
-
-    return Response.json(data, { status: 200 });
-  } catch (err) {
-    console.error(err);
-
-    throw new Error("Failed to fetch data");
-  }
+  return Response.json(
+    {
+      success: true,
+      count: mockEvents.length,
+      events: mockEvents,
+    },
+    { status: 200 },
+  );
 }

@@ -24,12 +24,8 @@ export default function SearchForm() {
   const [distance, setDistance] = useState(initialDistance);
 
   return (
-    <form
-      action="/"
-      method="GET"
-      className="mx-auto mt-4 flex w-full max-w-xl flex-col gap-3 md:mt-6 md:flex-row md:items-center"
-    >
-      <div className="flex h-12 min-h-12 w-full items-center rounded-full bg-white pl-4 pr-1 md:flex-1">
+    <form action="/" method="GET" className="relative mx-auto mt-3 w-full md:mt-4">
+      <div className="flex h-12 min-h-12 w-full items-center rounded-full bg-white py-1 pl-4 pr-1">
         <label htmlFor="location" className="sr-only">
           Enter postcode or town
         </label>
@@ -44,7 +40,7 @@ export default function SearchForm() {
         <label htmlFor="distance" className="sr-only">
           Search radius
         </label>
-        <div className="relative ml-2 shrink-0">
+        <div className="relative ml-1 shrink-0">
           <select
             name="distance"
             id="distance"
@@ -64,13 +60,13 @@ export default function SearchForm() {
             className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-amber-dark"
           />
         </div>
+        <button
+          type="submit"
+          className="ml-1 h-10 shrink-0 cursor-pointer rounded-full bg-navy px-4 text-sm font-semibold text-white hover:bg-btn-primary-hover focus:ring-2 focus:ring-sage/40 md:px-6 md:text-base"
+        >
+          Search
+        </button>
       </div>
-      <button
-        type="submit"
-        className="h-12 min-h-12 w-full cursor-pointer rounded-full bg-white px-8 text-base font-semibold text-navy hover:bg-hover-tint focus:ring-2 focus:ring-sage/40 md:w-auto"
-      >
-        Search
-      </button>
     </form>
   );
 }
