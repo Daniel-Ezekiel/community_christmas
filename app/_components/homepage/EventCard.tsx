@@ -1,4 +1,4 @@
-import { Accessibility, Clock, MapPin } from "lucide-react";
+import { Accessibility, Clock } from "lucide-react";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
 import { cn } from "@/app/_utils/cn";
 import { isAccessibleEvent, isFreeEvent } from "@/app/_utils/eventFilters";
@@ -12,6 +12,40 @@ function asLatLng(value: LatLngExpression | undefined): number[] | null {
     return [value.lat, value.lng];
   }
   return null;
+}
+
+function EventTypeChip({
+  eventType,
+  compact = false,
+}: {
+  eventType: string;
+  compact?: boolean;
+}) {
+  return (
+    <span
+      className={
+        compact
+          ? "inline-block w-auto max-w-full self-start truncate rounded-[20px] border border-[#e5e7eb] bg-[#f3f4f6] px-[10px] py-1 text-[12px] text-[#395460]"
+          : "inline-block max-w-[50%] truncate rounded-pill border border-[#e5e7eb] bg-off-white px-[10px] py-[3px] text-[12px] text-navy"
+      }
+    >
+      {eventType}
+    </span>
+  );
+}
+
+function PriceBadge({ free }: { free: boolean }) {
+  return (
+    <span
+      className={
+        free
+          ? "shrink-0 rounded-pill bg-free-fill px-2 py-0.5 text-xs font-semibold text-free-text md:px-3 md:py-1 md:text-sm"
+          : "shrink-0 rounded-pill bg-paid-fill px-2 py-0.5 text-xs font-semibold text-amber-dark md:px-3 md:py-1 md:text-sm"
+      }
+    >
+      {free ? "Free" : "Paid"}
+    </span>
+  );
 }
 
 export default function EventCard({
@@ -35,69 +69,75 @@ export default function EventCard({
       : null;
   const free = isFreeEvent(event);
   const accessible = isAccessibleEvent(event);
+  const venueLabel = [event.venueName, event.city].filter(Boolean).join(", ");
 
   return (
     <button
       type="button"
       onClick={() => handleModalOpen(event.id)}
       className={cn(
-        "w-full rounded-card border border-card-border bg-white p-4 text-left cursor-pointer hover:bg-hover-tint",
+        "event-card w-full cursor-pointer border border-card-border bg-white text-left hover:bg-hover-tint",
+        "rounded-l-none rounded-r-card border-l-[3px] border-l-[#E8A020] px-4 py-[14px]",
+        "md:flex md:h-full md:flex-col md:rounded-[10px] md:border md:border-[#e5e7eb] md:border-l md:border-l-[#e5e7eb] md:p-4 md:hover:bg-white",
         className,
       )}
     >
-      <div className="mb-3 grid grid-cols-[1fr_auto] items-start gap-3">
-        <div className="min-w-0">
-          <h3 className="line-clamp-2 font-semibold text-navy">
+      <div className="flex items-start justify-between gap-3 md:hidden">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <h3 className="event-card-title font-semibold text-navy">
             {event.eventName}
           </h3>
-          <div className="mt-1 grid grid-cols-[1rem_1fr] items-center gap-x-2 gap-y-1 text-sm">
-            <MapPin
-              size={16}
-              className="justify-self-center text-navy"
-              aria-hidden
-            />
-            <p className="min-w-0 truncate font-medium text-navy">
-              {[event.venueName, event.city].filter(Boolean).join(", ")}
+          <p className="line-clamp-2 text-sm font-medium text-[#6b7280]">
+            {venueLabel}
+          </p>
+          <p className="flex min-w-0 items-center gap-1.5 text-sm text-mid-grey">
+            <Clock size={16} className="shrink-0" aria-hidden />
+            <span>{event.time}</span>
+            {accessible ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden>·</span>
+                <Accessibility
+                  size={16}
+                  className="text-access-text"
+                  aria-label="Accessible venue"
+                />
+              </span>
+            ) : null}
+          </p>
+          {distanceInMiles != null ? (
+            <p className="text-sm text-mid-grey">
+              {distanceInMiles.toFixed(1)} miles away
             </p>
-            <Clock
-              size={16}
-              className="justify-self-center text-mid-grey"
-              aria-hidden
-            />
-            <p className="text-mid-grey">{event.time}</p>
-          </div>
+          ) : null}
+          <EventTypeChip eventType={event.eventType} compact />
         </div>
-        <span
-          className={
-            free
-              ? "rounded-pill bg-free-fill px-2 py-0.5 text-xs font-semibold text-free-text md:px-3 md:py-1 md:text-sm"
-              : "rounded-pill bg-paid-fill px-2 py-0.5 text-xs font-semibold text-amber-dark md:px-3 md:py-1 md:text-sm"
-          }
-        >
-          {free ? "Free" : "Paid"}
-        </span>
+        <PriceBadge free={free} />
       </div>
 
-      {distanceInMiles != null || accessible ? (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-card-border py-2 text-sm text-mid-grey">
-          {distanceInMiles != null ? (
-            <span className="inline-flex items-center gap-2">
-              <MapPin size={16} aria-hidden />
-              {distanceInMiles.toFixed(1)} miles away
-            </span>
-          ) : null}
-          {accessible ? (
-            <span className="inline-flex items-center text-access-text">
-              <Accessibility size={16} aria-label="Accessible venue" />
-            </span>
-          ) : null}
+      <div className="hidden h-full min-h-0 flex-col md:flex">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="event-card-title min-w-0 text-[15px] font-bold leading-snug text-navy">
+            {event.eventName}
+          </h3>
+          <PriceBadge free={free} />
         </div>
-      ) : null}
-
-      <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-        <span className="max-w-[50%] truncate rounded-tag border border-card-border bg-off-white px-2 py-1 text-navy">
-          {event.eventType}
-        </span>
+        <p className="mt-1.5 text-[13px] text-[#6b7280]">{venueLabel}</p>
+        <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[13px] text-[#6b7280]">
+          <Clock size={14} className="shrink-0" aria-hidden />
+          <span>{event.time}</span>
+          {accessible ? (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>·</span>
+              <Accessibility
+                size={14}
+                aria-label="Accessible venue"
+              />
+            </span>
+          ) : null}
+        </p>
+        <div className="mt-auto pt-3">
+          <EventTypeChip eventType={event.eventType} />
+        </div>
       </div>
     </button>
   );

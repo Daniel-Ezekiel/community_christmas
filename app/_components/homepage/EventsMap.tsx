@@ -91,7 +91,7 @@ export default function EventsMap({
                   location={location}
                   postcodeCoords={postcodeCoords}
                   handleModalOpen={(id) => handleModalOpen?.(id)}
-                  className="rounded-none border-0 hover:bg-hover-tint [&>div:first-child]:pr-6"
+                  className="rounded-none border-0 border-l-0 hover:bg-hover-tint [&>div:first-child]:pr-6"
                 />
               </Popup>
             )}
