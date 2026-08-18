@@ -55,7 +55,7 @@ export default function EventsMap({
           mapRef.current = map;
         }}
       >
-        <AttributionControl position="bottomright" prefix="" />
+        <AttributionControl position="bottomright" prefix={"Leaflet"} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
