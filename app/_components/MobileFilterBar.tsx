@@ -45,22 +45,14 @@ export default function MobileFilterBar({
 
   return (
     <div ref={rootRef} className="md:hidden">
-      <div className="flex items-center justify-between gap-2">
-        <FilterPill
-          filterName="All events"
-          selected={showingAll}
-          onClick={() => {
-            onClear();
-            setOpen(false);
-          }}
-        />
+      <div className="flex items-center gap-3">
         <button
           type="button"
           aria-expanded={open}
           aria-controls={panelId}
           onClick={() => setOpen((current) => !current)}
           className={cn(
-            "inline-flex min-h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-pill border px-2.5 text-xs font-medium",
+            "filter-chip inline-flex min-h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-pill border px-2.5 text-xs font-medium",
             !showingAll || open
               ? "border-navy bg-light-sage text-navy"
               : "border-card-border bg-white text-navy hover:bg-hover-tint",
@@ -74,6 +66,15 @@ export default function MobileFilterBar({
             </span>
           ) : null}
         </button>
+        {showingAll ? null : (
+          <button
+            type="button"
+            onClick={onClear}
+            className="cursor-pointer text-[13px] text-navy underline"
+          >
+            Clear all
+          </button>
+        )}
       </div>
 
       {open ? (
@@ -81,9 +82,14 @@ export default function MobileFilterBar({
           id={panelId}
           role="dialog"
           aria-label="Filters"
-          className="mt-2 rounded-card border border-card-border bg-white p-3"
+          className="mt-2 rounded-card border border-card-border bg-white p-2"
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            <FilterPill
+              filterName="All events"
+              selected={showingAll}
+              onClick={onClear}
+            />
             {MORE_EVENT_FILTERS.map((option) => (
               <FilterPill
                 key={option.id}
