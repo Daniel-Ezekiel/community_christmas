@@ -5,7 +5,7 @@ export const EVENT_FILTERS = [
   { id: "free", label: "Free only" },
   { id: "accessible", label: "Accessible" },
   { id: "spaces", label: "Spaces left" },
-  { id: "booking", label: "Booking req." },
+  { id: "booking", label: "Booking required" },
   { id: "lunch", label: "Lunch" },
   { id: "dinner", label: "Dinner" },
   { id: "activity", label: "Activity" },
