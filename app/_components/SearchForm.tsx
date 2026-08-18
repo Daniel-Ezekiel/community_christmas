@@ -7,8 +7,6 @@ import { useState } from "react";
 const DISTANCE_OPTIONS = [
   { value: "5", label: "5 miles" },
   { value: "10", label: "10 miles" },
-  { value: "15", label: "15 miles" },
-  { value: "20", label: "20 miles" },
   { value: "25", label: "25 miles" },
 ];
 
