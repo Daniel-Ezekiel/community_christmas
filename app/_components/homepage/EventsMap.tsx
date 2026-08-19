@@ -53,7 +53,7 @@ export default function EventsMap({
   const mapRef = useRef<L.Map | null>(null);
 
   return (
-    <div>
+    <div className="relative z-0 isolate overflow-hidden">
       <MapContainer
         center={position}
         zoom={zoom}
