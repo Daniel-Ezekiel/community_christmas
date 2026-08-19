@@ -49,7 +49,9 @@ export default function SearchForm() {
   }, [location]);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      inputRef.current?.focus();
+    }
   }, []);
 
   useEffect(() => {
@@ -106,7 +108,10 @@ export default function SearchForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative mx-auto mt-3 w-full md:mt-4">
+    <form
+      onSubmit={handleSubmit}
+      className="search-form relative mx-auto mt-3 w-full md:mt-4"
+    >
       <div className="search-bar flex h-12 min-h-12 w-full min-w-0 items-center overflow-hidden rounded-full bg-white py-1 pl-4 pr-1">
         <label htmlFor="location" className="sr-only">
           Enter postcode or town
@@ -167,30 +172,34 @@ export default function SearchForm() {
           Search
         </button>
       </div>
-      <div
-        role="radiogroup"
-        aria-label="Search radius"
-        className="mt-3 flex w-full gap-2 md:hidden"
-      >
-        {DISTANCE_OPTIONS.map((option) => {
-          const selected = distance === option.value;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => setDistance(option.value)}
-              className={
-                selected
-                  ? "box-border flex h-8 min-h-8 flex-1 cursor-pointer items-center justify-center rounded-pill border border-transparent bg-[#E8A020] px-2 text-sm font-semibold text-white"
-                  : "box-border flex h-8 min-h-8 flex-1 cursor-pointer items-center justify-center rounded-pill border border-solid border-[#d1d5db] bg-white px-2 text-sm font-semibold text-[#395460]"
-              }
-            >
-              {option.label}
-            </button>
-          );
-        })}
+      <div className="search-radius md:hidden">
+        <div className="min-h-0 overflow-hidden">
+          <div
+            role="radiogroup"
+            aria-label="Search radius"
+            className="mt-3 flex w-full gap-2"
+          >
+            {DISTANCE_OPTIONS.map((option) => {
+              const selected = distance === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setDistance(option.value)}
+                  className={
+                    selected
+                      ? "box-border flex h-8 min-h-8 flex-1 cursor-pointer items-center justify-center rounded-pill border border-transparent bg-[#E8A020] px-2 text-sm font-semibold text-white"
+                      : "box-border flex h-8 min-h-8 flex-1 cursor-pointer items-center justify-center rounded-pill border border-solid border-[#d1d5db] bg-white px-2 text-sm font-semibold text-[#395460]"
+                  }
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
       {error ? (
         <p id={errorId} role="alert" className="mt-2 text-sm text-error">

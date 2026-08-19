@@ -298,6 +298,50 @@ a,
   transition: box-shadow 0.2s ease;
 }
 
+.site-header-inner,
+.site-header-brand,
+.site-header-intro,
+.site-header-main,
+.search-form,
+.search-radius {
+  transition: all 0.25s ease;
+}
+
+.site-header-brand,
+.site-header-intro {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+@media (max-width: 767px) {
+  .site-header {
+    transition: all 0.25s ease;
+  }
+
+  .search-radius {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .site-header.is-compact .site-header-inner {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .site-header.is-compact .site-header-main,
+  .site-header.is-compact .search-form {
+    margin-top: 0;
+  }
+
+  .site-header.is-compact .site-header-brand,
+  .site-header.is-compact .site-header-intro,
+  .site-header.is-compact .search-radius {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 /* Leaflet panes use z-index 400–1000. Keep them inside the map so they
    cannot paint over the sticky header (z-50) or the rest of the page. */
 .leaflet-container {
@@ -331,6 +375,12 @@ a,
   .modal-overlay,
   .modal-panel,
   .site-header,
+  .site-header-inner,
+  .site-header-brand,
+  .site-header-intro,
+  .site-header-main,
+  .search-form,
+  .search-radius,
   .logo-pulse {
     animation: none;
     transform: none;
