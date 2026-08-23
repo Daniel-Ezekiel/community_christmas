@@ -30,7 +30,7 @@ export default function Header() {
               method="GET"
               className="mt-4 sm:grid sm:grid-cols-[2fr_1fr] sm:gap-4 sm:items-center"
             >
-              <div className="form_control mb-4 bg-white rounded-lg flex items-center justify-between px-4 py-2 sm:mb-0">
+              <div className="form_control mb-4 bg-white rounded-lg grid grid-cols-[auto_auto] gap-2 px-4 py-2 sm:mb-0">
                 <label htmlFor="search" id="search-label" className="hidden">
                   Enter postcode or town
                 </label>
@@ -39,12 +39,14 @@ export default function Header() {
                   id="location"
                   name="location"
                   placeholder="Enter postcode or town"
-                  className="bg-transparent text-navy placeholder:text-mid-grey focus:ring-2 focus:ring-sage/35 disabled:bg-light-grey disabled:text-mid-grey"
+                  required
+                  className="w-full bg-transparent text-navy placeholder:text-mid-grey focus:ring-2 focus:ring-sage/35 disabled:bg-light-grey disabled:text-mid-grey"
                 />
                 <select
                   name="distance"
                   id="distance"
-                  className="bg-amber rounded-3xl text-amber-dark font-semibold text-xs border border-sage focus:ring-2 focus:ring-sage/35 disabled:bg-light-grey disabled:text-mid-grey"
+                  required
+                  className="w-full bg-amber rounded-3xl text-amber-dark font-semibold text-xs border border-sage focus:ring-2 focus:ring-sage/35 disabled:bg-light-grey disabled:text-mid-grey"
                 >
                   <option value="5">Within 5 miles</option>
                   <option value="10">Within 10 miles</option>
@@ -53,7 +55,7 @@ export default function Header() {
                   <option value="25">Within 25 miles</option>
                 </select>
               </div>
-              <Button variant="default" type="submit">
+              <Button variant="secondary" type="submit" className="w-full text-base sm:w-auto">
                 Search
               </Button>
             </form>

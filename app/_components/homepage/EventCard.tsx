@@ -14,7 +14,6 @@ export default function EventCard({
   handleModalOpen: (eventID: string) => void;
 }) {
   const distanceInMiles =  location && calculateDistanceInMiles(postcodeCoords as number[], event.coordinates.latLng as number[]);
-  console.log(location, "distanceInMiles");
 
   return (
     <div
@@ -34,7 +33,7 @@ export default function EventCard({
 
       <div className="border-y border-card-border py-2 my-2 flex justify-between text-sm text-mid-grey">
         <span>🕐 {event.time}</span>
-        <span>📍 {!location && event.postcode} {location && (distanceInMiles as number)?.toFixed(1)} miles</span>
+        <span>📍 {!location && event.postcode} {location && `${(distanceInMiles as number)?.toFixed(1)} miles`}</span>
         <span>♿</span>
       </div>
 

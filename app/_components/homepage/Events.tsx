@@ -210,14 +210,14 @@ export default function Events() {
               <Button
                 onClick={() => setCurrentPage(currentPage - 1)}
                 isDisabled={currentPage === 1}
-                className="w-36 flex justify-center items-center gap-2 p-2 px-4 rounded-xl transition-all ease-in-out duration-300"
+                className="w-36 flex justify-center items-center gap-2 transition-all ease-in-out duration-300"
               >
                 <ArrowLeft /> Previous
               </Button>
               <Button
                 onClick={() => setCurrentPage(currentPage + 1)}
                 isDisabled={currentPage * 12 >= eventsData.length}
-                className="w-36 flex justify-center items-center gap-2 p-2 px-4 rounded-xl transition-all ease-in-out duration-300"
+                className="w-36 flex justify-center items-center gap-2 transition-all ease-in-out duration-300"
               >
                 Next <ArrowRight />
               </Button>

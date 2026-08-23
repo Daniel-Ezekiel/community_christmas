@@ -2,7 +2,13 @@
 
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression } from "leaflet";
-import { AttributionControl, MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import {
+  AttributionControl,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+} from "react-leaflet";
 import { useRef } from "react";
 import { EventDetails } from "@/types";
 import EventCard from "./EventCard";
@@ -26,7 +32,7 @@ export default function EventsMap({
   postcodeCoords,
   handleModalOpen,
   isForModal = false,
-  height = "475px"
+  height = "475px",
 }: {
   position: LatLngExpression;
   zoom?: number;
@@ -35,7 +41,7 @@ export default function EventsMap({
   postcodeCoords?: LatLngExpression;
   handleModalOpen?: (eventID: string) => void;
   isForModal?: boolean;
-  height?: string
+  height?: string;
 }) {
   const mapRef = useRef<L.Map | null>(null);
 
@@ -60,7 +66,16 @@ export default function EventsMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {events.map((eventData) => (
-          <Marker key={eventData.id} position={eventData.coordinates.latLng}>
+          <Marker
+            key={eventData.id}
+            position={eventData.coordinates.latLng}
+            icon={L.icon({
+              iconUrl: "/leaflet/map-pin.svg",
+              iconSize: [30, 95],
+              iconAnchor: [22, 94],
+              popupAnchor: [-3, -76],
+            })}
+          >
             {!isForModal && (
               <Popup>
                 <EventCard
