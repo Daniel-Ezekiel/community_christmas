@@ -21,7 +21,7 @@ export default function ViewToggle({
 
   return (
     <>
-      <button
+      {/* <button
         type="button"
         onClick={() => onChange(value === "list" ? "map" : "list")}
         aria-label={
@@ -33,13 +33,13 @@ export default function ViewToggle({
         )}
       >
         {value === "list" ? "List view" : "Map view"}
-      </button>
+      </button> */}
 
       <div
         role="group"
         aria-label="Results view"
         className={cn(
-          "hidden grid-cols-2 rounded-pill border border-card-border bg-white p-1 md:grid",
+          "grid grid-cols-2 rounded-pill border border-card-border bg-white p-1",
           className ?? "w-full max-w-72 justify-self-end",
         )}
       >
@@ -52,11 +52,11 @@ export default function ViewToggle({
               aria-pressed={selected}
               onClick={() => onChange(id)}
               className={cn(
-                "flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-pill px-3 font-semibold",
+                "flex min-h-8 cursor-pointer items-center justify-center gap-2 rounded-pill px-3 font-semibold text-sm md:text-base md:min-h-11",
                 selected ? "bg-navy text-white" : "bg-white text-navy",
               )}
             >
-              <Icon size={18} aria-hidden />
+              <Icon className="size-4 md:size-5" aria-hidden />
               {label}
             </button>
           );

@@ -189,7 +189,7 @@ export default function Events() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="w-full mx-auto max-w-7xl">
       <section className="grid gap-4">
         <MobileFilterBar
           selected={selectedFilters}
@@ -218,7 +218,7 @@ export default function Events() {
             </div>
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-off-white"
+              className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-off-white"
             />
           </div>
           {allEventsSelected ? null : (
@@ -269,28 +269,37 @@ export default function Events() {
       </section>
 
       <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {eventsData.length > 0 ? (
-          eventsData
-            .slice((currentPage - 1) * 12, currentPage * 12)
-            .map((event) => (
-              <EventCard
-                key={`${event.id}-${selectedFilters.join(",")}-${currentPage}-${location}-${distance}`}
-                event={event}
-                location={location}
-                postcodeCoords={postcodeCoordinates as LatLngExpression}
-                handleModalOpen={handleModalOpen}
-                className="results-card"
+        {view === "list" && (
+          <>
+            {eventsData.length > 0 ? (
+              eventsData
+                .slice((currentPage - 1) * 12, currentPage * 12)
+                .map((event) => (
+                  <EventCard
+                    key={`${event.id}-${selectedFilters.join(",")}-${currentPage}-${location}-${distance}`}
+                    event={event}
+                    location={location}
+                    postcodeCoords={postcodeCoordinates as LatLngExpression}
+                    handleModalOpen={handleModalOpen}
+                    className="results-card"
+                  />
+                ))
+            ) : (
+              <EmptyState
+                location={location ?? "this search"}
+                distance={distance}
               />
-            ))
-        ) : (
-          <EmptyState location={location ?? "this search"} distance={distance} />
-        )}
+            )}
+          </>
+        ) }
       </section>
 
-      {eventsData.length > 12 ? (
+      {eventsData.length > 12 && view === "list" ? (
         <div className="mt-4 mb-10 border-t border-[#e5e7eb] pt-4">
           <p className="text-center text-[14px] text-mid-grey">
-            Showing {(currentPage - 1) * 12 + 1}–{Math.min(currentPage * 12, eventsData.length)} of {eventsData.length} events
+            Showing {(currentPage - 1) * 12 + 1}–
+            {Math.min(currentPage * 12, eventsData.length)} of{" "}
+            {eventsData.length} events
           </p>
           <div className="mt-4 flex justify-center gap-4">
             {currentPage > 1 ? (
