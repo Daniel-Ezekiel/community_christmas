@@ -1,48 +1,144 @@
+import { Accessibility, Clock } from "lucide-react";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
+import { cn } from "@/app/_utils/cn";
+import { isAccessibleEvent, isFreeEvent } from "@/app/_utils/eventFilters";
 import { EventDetails } from "@/types";
 import { LatLngExpression } from "leaflet";
+
+function asLatLng(value: LatLngExpression | undefined): number[] | null {
+  if (!value) return null;
+  if (Array.isArray(value)) return [Number(value[0]), Number(value[1])];
+  if (typeof value === "object" && "lat" in value) {
+    return [value.lat, value.lng];
+  }
+  return null;
+}
+
+function EventTypeChip({
+  eventType,
+  compact = false,
+}: {
+  eventType: string;
+  compact?: boolean;
+}) {
+  return (
+    <span
+      className={
+        compact
+          ? "inline-block w-auto max-w-full self-start truncate rounded-[20px] border border-[#e5e7eb] bg-[#f3f4f6] px-[10px] py-1 text-[12px] text-[#395460]"
+          : "inline-block max-w-[50%] truncate rounded-pill border border-[#e5e7eb] bg-off-white px-[10px] py-[3px] text-[12px] text-navy"
+      }
+    >
+      {eventType}
+    </span>
+  );
+}
+
+function PriceBadge({ free }: { free: boolean }) {
+  return (
+    <span
+      className={
+        free
+          ? "shrink-0 rounded-pill bg-free-fill px-2 py-0.5 text-xs font-semibold text-free-text md:px-3 md:py-1 md:text-sm"
+          : "shrink-0 rounded-pill bg-paid-fill px-2 py-0.5 text-xs font-semibold text-amber-dark md:px-3 md:py-1 md:text-sm"
+      }
+    >
+      {free ? "Free" : "Paid"}
+    </span>
+  );
+}
 
 export default function EventCard({
   event,
   location,
   postcodeCoords,
   handleModalOpen,
+  className,
 }: {
   event: EventDetails;
   location: string | null;
   postcodeCoords?: LatLngExpression;
   handleModalOpen: (eventID: string) => void;
+  className?: string;
 }) {
-  const distanceInMiles =  location && calculateDistanceInMiles(postcodeCoords as number[], event.coordinates.latLng as number[]);
+  const origin = asLatLng(postcodeCoords);
+  const destination = asLatLng(event.coordinates.latLng);
+  const distanceInMiles =
+    location && origin && destination
+      ? calculateDistanceInMiles(origin, destination)
+      : null;
+  const free = isFreeEvent(event);
+  const accessible = isAccessibleEvent(event);
+  const venueLabel = [event.venueName, event.city].filter(Boolean).join(", ");
 
   return (
-    <div
-      aria-label="button"
-      role="button"
-      className="border border-card-border rounded-xl p-4 cursor-pointer"
+    <button
+      type="button"
       onClick={() => handleModalOpen(event.id)}
+      className={cn(
+        "event-card w-full cursor-pointer border border-card-border bg-white text-left hover:bg-hover-tint",
+        "rounded-l-none rounded-r-card border-l-[3px] border-l-[#E8A020] px-4 py-[14px]",
+        "md:flex md:h-full md:flex-col md:rounded-[10px] md:border md:border-[#e5e7eb] md:border-l md:border-l-[#e5e7eb] md:p-4 md:hover:bg-white",
+        className,
+      )}
     >
-      <div className="grid grid-cols-[1fr_auto] gap-8 mb-4">
-        <h3 className="font-semibold text-navy md:min-h-14">
-          {event.eventName}
-        </h3>
-        <span className="px-3 py-1 rounded-3xl bg-success-fill text-success-text font-semibold text-sm self-start">
-          Free
-        </span>
+      <div className="flex items-start justify-between gap-3 md:hidden">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <h3 className="event-card-title font-semibold text-navy">
+            {event.eventName}
+          </h3>
+          <p className="line-clamp-2 text-sm font-medium text-[#6b7280]">
+            {venueLabel}
+          </p>
+          <p className="flex min-w-0 items-center gap-1.5 text-sm text-mid-grey">
+            <Clock size={16} className="shrink-0" aria-hidden />
+            <span>{event.time}</span>
+            {accessible ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden>·</span>
+                <Accessibility
+                  size={16}
+                  className="text-access-text"
+                  aria-label="Accessible venue"
+                />
+              </span>
+            ) : null}
+          </p>
+          {distanceInMiles != null ? (
+            <p className="text-sm text-mid-grey">
+              {distanceInMiles.toFixed(1)} miles away
+            </p>
+          ) : null}
+          <EventTypeChip eventType={event.eventType} compact />
+        </div>
+        <PriceBadge free={free} />
       </div>
 
-      <div className="border-y border-card-border py-2 my-2 flex justify-between text-sm text-mid-grey">
-        <span>🕐 {event.time}</span>
-        <span>📍 {!location && event.postcode} {location && `${(distanceInMiles as number)?.toFixed(1)} miles`}</span>
-        <span>♿</span>
+      <div className="hidden h-full min-h-0 flex-col md:flex">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="event-card-title min-w-0 text-[15px] font-bold leading-snug text-navy">
+            {event.eventName}
+          </h3>
+          <PriceBadge free={free} />
+        </div>
+        <p className="mt-1.5 text-[13px] text-[#6b7280]">{venueLabel}</p>
+        <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[13px] text-[#6b7280]">
+          <Clock size={14} className="shrink-0" aria-hidden />
+          <span>{event.time}</span>
+          {accessible ? (
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden>·</span>
+              <Accessibility
+                size={14}
+                aria-label="Accessible venue"
+              />
+            </span>
+          ) : null}
+        </p>
+        <div className="mt-auto pt-3">
+          <EventTypeChip eventType={event.eventType} />
+        </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-4 items-center text-sm text-mid-grey">
-        <span className="w-fit bg-off-white border border-card-border rounded-[4px] px-2 py-1">
-          {event.eventType}
-        </span>
-        <span>{event.organisation}</span>
-      </div>
-    </div>
+    </button>
   );
 }

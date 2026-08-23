@@ -1,20 +1,47 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, List, Map, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import FilterPill from "../FilterPill";
+import MobileFilterBar from "../MobileFilterBar";
 import EventCard from "./EventCard";
+import EmptyState from "./EmptyState";
+import EventModal from "./EventModal";
+import StatusPanel from "./StatusPanel";
+import ViewToggle from "../ViewToggle";
 import { useQuery } from "@tanstack/react-query";
-// import EventsMap from "./EventsMap";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import Button from "../Button";
 import { EventDetails } from "@/types";
-import { PulseLoader } from "react-spinners";
 import { useSearchParams } from "next/navigation";
 import { getPostcodeDetails } from "@/app/_utils/getPostcodeDetails";
 import { calculateDistanceInMiles } from "@/app/_utils/calculateDistance";
+import {
+  EVENT_FILTERS,
+  EventFilterId,
+  filterEvents,
+  SelectableEventFilterId,
+} from "@/app/_utils/eventFilters";
 import { LatLngExpression } from "leaflet";
-import Link from "next/link";
+
+function formatEventCount(count: number) {
+  return `${count} ${count === 1 ? "event" : "events"}`;
+}
+
+function getResultsHeading(
+  count: number,
+  location: string | null,
+  distance: string | null,
+  searchedNearby: boolean,
+) {
+  if (searchedNearby && location && distance) {
+    return `${formatEventCount(count)} within ${distance} miles of ${location}`;
+  }
+  if (location) {
+    return `${formatEventCount(count)} near ${location}`;
+  }
+  return `${formatEventCount(count)} across the UK`;
+}
 
 const EventsMap = dynamic(
   () => import("@/app/_components/homepage/EventsMap"),
@@ -25,29 +52,9 @@ const EventsMap = dynamic(
 );
 
 const getEvents = async () => {
-  //   const url =
-  //     process.env.NODE_ENV === "production"
-  //       ? process.env.NEXT_PUBLIC_PROD_URL
-  //       : process.env.NEXT_PUBLIC_LOCAL_URL;
-
-  //       console.log(process.env.NODE_ENV, process.env.NEXT_PUBLIC_PROD_URL, process.env.NEXT_PUBLIC_LOCAL_URL)
-
-  try {
-    const res = await fetch(`/api/events/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!res.ok) throw new Error(`Failed to fetch events: ${res.statusText}`);
-
-    const events = await res.json();
-    return events;
-  } catch (err) {
-    console.log(`Failed to fetch events: ${err}`);
-    throw new Error(`Failed to fetch events: ${err}`);
-  }
+  const res = await fetch("/api/events/");
+  if (!res.ok) throw new Error(`Failed to fetch events: ${res.statusText}`);
+  return res.json();
 };
 
 export default function Events() {
@@ -55,130 +62,200 @@ export default function Events() {
   const location = searchParams.get("location");
   const distance = searchParams.get("distance");
 
-  const [isMapActive, setIsMapActive] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isLoadingPostcodeDetails, setIsLoadingPostcodeDetails] =
-    useState<boolean>(location ? true : false);
+  const [view, setView] = useState<"map" | "list">("list");
+  const [selectedFilters, setSelectedFilters] = useState<
+    SelectableEventFilterId[]
+  >([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventDetails | null>(null);
-  const [postcodeCoordinates, setPostcodeCoordinates] =
-    useState<LatLngExpression | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { isPending, isLoading, error, data } = useQuery({
+  const { isPending, isLoading, error, data, refetch, isFetching } = useQuery({
     queryKey: ["eventsData"],
     queryFn: getEvents,
   });
 
-  const allEventsData: EventDetails[] | [] = data?.events || [];
-  // const eventsData: EventDetails[] | [] = data?.events || [];
-
-  useEffect(() => {
-    let mounted = true;
-    if (!location) return;
-    (async () => {
+  const { data: postcodeDetails, isFetching: isFetchingPostcode } = useQuery({
+    queryKey: ["postcodeDetails", location],
+    queryFn: async () => {
       try {
-        const details = await getPostcodeDetails(location);
-        if (mounted)
-          setPostcodeCoordinates([
-            details.result.latitude,
-            details.result.longitude,
-          ]);
+        return await getPostcodeDetails(location as string);
       } catch (err) {
         console.error(err);
-        if (mounted) setPostcodeCoordinates(null);
-      } finally {
-        if (mounted) setIsLoadingPostcodeDetails(false);
+        return null;
       }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [location]);
+    },
+    enabled: Boolean(location),
+    retry: false,
+  });
 
-  const filteredEventsData =
-    (postcodeCoordinates &&
-      distance &&
-      allEventsData.filter((event) => {
-        const eventDistance = calculateDistanceInMiles(
-          postcodeCoordinates as number[],
-          event.coordinates.latLng as number[],
-        );
+  const isLoadingPostcodeDetails = Boolean(location) && isFetchingPostcode;
+  const postcodeCoordinates: LatLngExpression | null = postcodeDetails
+    ? [postcodeDetails.result.latitude, postcodeDetails.result.longitude]
+    : null;
 
-        return eventDistance <= Number(distance);
-      })) ||
-    [];
+  const allEventsData: EventDetails[] = data?.events || [];
 
-  const eventsData: EventDetails[] | [] =
-    location && distance
-      ? (filteredEventsData as EventDetails[] | [])
+  const nearbyEvents =
+    location && distance && postcodeCoordinates
+      ? allEventsData.filter((event) => {
+          const coords = event.coordinates.latLng;
+          if (!Array.isArray(coords)) return false;
+          return (
+            calculateDistanceInMiles(
+              postcodeCoordinates as number[],
+              coords as number[],
+            ) <= Number(distance)
+          );
+        })
       : allEventsData;
+  const searchedNearby = Boolean(location && distance && postcodeCoordinates);
 
-  const filterOptions = [
-    "All Events",
-    "Free only",
-    "Accessible",
-    "Spaces left",
-    "Booking req.",
-    "Lunch",
-    "Dinner",
-    "Activity",
-  ];
+  const eventsData = filterEvents(nearbyEvents, selectedFilters);
+
+  const allEventsSelected = selectedFilters.length === 0;
+
+  const handleFilterClick = (id: EventFilterId) => {
+    if (id === "all") {
+      setSelectedFilters([]);
+      setCurrentPage(1);
+      return;
+    }
+
+    setSelectedFilters((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    );
+    setCurrentPage(1);
+  };
+
+  const handleToggleFilter = (filter: SelectableEventFilterId) => {
+    handleFilterClick(filter);
+  };
+
+  const handleClearFilters = () => {
+    handleFilterClick("all");
+  };
 
   const handleModalOpen = (eventID: string) => {
-    setIsModalOpen(true);
     const eventToDisplay = eventsData.find((event) => event.id === eventID);
-    if (eventToDisplay?.id) {
-      setSelectedEvent(eventToDisplay);
-    } else return;
+    if (!eventToDisplay) return;
+    setSelectedEvent(eventToDisplay);
+    setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
     setSelectedEvent(null);
-  };
+  }, []);
 
   if (isPending || isLoading || isLoadingPostcodeDetails) {
     return (
-      <div className="max-w-fit mx-auto grid gap-4">
-        <p className="text-center"> Loading...</p>
-      </div>
+      <StatusPanel
+        variant="loading"
+        title="Looking for events near you..."
+        description="This may take a moment."
+      />
     );
   }
 
-  if (error) return "An error has occurred: " + error.message;
+  if (error) {
+    return (
+      <StatusPanel
+        variant="error"
+        title="We couldn't load events"
+        description="Please try again. If it keeps happening, check back a little later."
+        detail={error.message}
+      >
+        <Button
+          onClick={() => {
+            void refetch();
+          }}
+          isDisabled={isFetching}
+          className="inline-flex min-h-11 w-fit items-center rounded-pill px-10"
+        >
+          Try again
+        </Button>
+      </StatusPanel>
+    );
+  }
+
+  const resultsHeading = getResultsHeading(
+    eventsData.length,
+    location,
+    distance,
+    searchedNearby,
+  );
 
   return (
-    <div className="max-w-300 mx-auto">
-      <section className="grid gap-4 sm:grid-cols-2 sm:items-center sm:gap-y-4">
-        <div className="w-full py-2 flex gap-3 overflow-scroll sm:col-span-full lg:overflow-auto">
-          {filterOptions.map((option, idx) => {
-            return <FilterPill key={idx} filterName={option} />;
-          })}
+    <div className="mx-auto max-w-7xl">
+      <section className="grid gap-4">
+        <MobileFilterBar
+          selected={selectedFilters}
+          onToggle={handleToggleFilter}
+          onClear={handleClearFilters}
+        />
+
+        <div className="relative hidden md:flex md:items-center md:gap-3">
+          <div className="relative min-w-0 flex-1">
+            <div className="flex w-full gap-2 overflow-x-auto py-2 pr-8">
+              {EVENT_FILTERS.map((option) => {
+                const isAll = option.id === "all";
+                const isSelected = isAll
+                  ? allEventsSelected
+                  : selectedFilters.includes(option.id);
+
+                return (
+                  <FilterPill
+                    key={option.id}
+                    filterName={option.label}
+                    selected={isSelected}
+                    onClick={() => handleFilterClick(option.id)}
+                  />
+                );
+              })}
+            </div>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-off-white"
+            />
+          </div>
+          {allEventsSelected ? null : (
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="shrink-0 cursor-pointer text-[13px] text-navy underline"
+            >
+              Clear all
+            </button>
+          )}
         </div>
 
-        <h2 className="font-semibold text-lg md:text-xl lg:text-2xl lg:font-bold lg:py-6 xl:text-4xl">
-          {location
-            ? `${eventsData.length} Events near ${location}`
-            : `${eventsData.length} events across the UK`}
-        </h2>
-
-        <div className="w-full p-1 border border-card-border bg-white rounded-full grid grid-cols-2 sm:max-w-90 sm:justify-self-end">
-          <button
-            onClick={() => setIsMapActive(true)}
-            className={`p-1 flex items-center justify-center gap-2 text-center font-semibold rounded-full transition-all ease-in-out duration-500 cursor-pointer ${isMapActive ? "bg-navy text-white" : "bg-white text-navy"}`}
-          >
-            <Map /> Map
-          </button>
-          <button
-            onClick={() => setIsMapActive(false)}
-            className={`p-2 flex items-center justify-center gap-2 text-center rounded-full transition-all ease-in-out duration-500 cursor-pointer ${!isMapActive ? "bg-navy text-white" : "bg-white text-navy"}`}
-          >
-            <List /> List
-          </button>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <h2 className="text-lg font-semibold text-navy md:min-w-0 md:flex-1 md:truncate md:text-xl lg:text-2xl lg:font-bold">
+            {searchedNearby && location && distance ? (
+              <>
+                <span className="md:hidden">
+                  {formatEventCount(eventsData.length)} within {distance} miles
+                  of
+                  <span className="mt-0.5 block">{location}</span>
+                </span>
+                <span className="hidden md:inline">{resultsHeading}</span>
+              </>
+            ) : (
+              resultsHeading
+            )}
+          </h2>
+          <ViewToggle
+            value={view}
+            onChange={setView}
+            className="shrink-0 self-start md:self-auto"
+          />
         </div>
 
-        {Boolean(eventsData.length) && isMapActive && (
-          <div className="col-span-full">
+        {eventsData.length > 0 && view === "map" ? (
+          <div className="col-span-full overflow-hidden rounded-card">
             <EventsMap
               position={[54.0, -2.5]}
               zoom={5}
@@ -188,189 +265,61 @@ export default function Events() {
               handleModalOpen={handleModalOpen}
             />
           </div>
+        ) : null}
+      </section>
+
+      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {eventsData.length > 0 ? (
+          eventsData
+            .slice((currentPage - 1) * 12, currentPage * 12)
+            .map((event) => (
+              <EventCard
+                key={`${event.id}-${selectedFilters.join(",")}-${currentPage}-${location}-${distance}`}
+                event={event}
+                location={location}
+                postcodeCoords={postcodeCoordinates as LatLngExpression}
+                handleModalOpen={handleModalOpen}
+                className="results-card"
+              />
+            ))
+        ) : (
+          <EmptyState location={location ?? "this search"} distance={distance} />
         )}
       </section>
 
-      <section className="mt-8 grid gap-4 md:place-items-stretch md:grid-cols-2 lg:grid-cols-3">
-        {Boolean(eventsData.length) && (
-          <>
-            {eventsData
-              .slice((currentPage - 1) * 12, currentPage * 12)
-              .map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  location={location}
-                  postcodeCoords={postcodeCoordinates as LatLngExpression}
-                  handleModalOpen={handleModalOpen}
-                />
-              ))}
-
-            <div className="mt-4 col-span-full flex justify-center gap-4">
+      {eventsData.length > 12 ? (
+        <div className="mt-4 mb-10 border-t border-[#e5e7eb] pt-4">
+          <p className="text-center text-[14px] text-mid-grey">
+            Showing {(currentPage - 1) * 12 + 1}–{Math.min(currentPage * 12, eventsData.length)} of {eventsData.length} events
+          </p>
+          <div className="mt-4 flex justify-center gap-4">
+            {currentPage > 1 ? (
               <Button
-                onClick={() => setCurrentPage(currentPage - 1)}
-                isDisabled={currentPage === 1}
-                className="w-36 flex justify-center items-center gap-2 transition-all ease-in-out duration-300"
+                onClick={() => setCurrentPage((page) => page - 1)}
+                className="flex w-36 items-center justify-center gap-2 rounded-xl p-2 px-4"
               >
                 <ArrowLeft /> Previous
               </Button>
-              <Button
-                onClick={() => setCurrentPage(currentPage + 1)}
-                isDisabled={currentPage * 12 >= eventsData.length}
-                className="w-36 flex justify-center items-center gap-2 transition-all ease-in-out duration-300"
-              >
-                Next <ArrowRight />
-              </Button>
-            </div>
-          </>
-        )}
-
-        {!eventsData.length && (
-          <div className="min-h-80 my-10 col-span-full grid gap-4 place-items-center text-center md:max-w-205 md:mx-auto md:px-20 md:py-10 md:bg-off-white md:border md:border-card-border md:rounded-xl">
-            <div
-              aria-label="icon"
-              className="mx-auto w-16 h-16 bg-light-sage rounded-full grid place-items-center"
+            ) : null}
+            <Button
+              onClick={() => setCurrentPage((page) => page + 1)}
+              isDisabled={currentPage * 12 >= eventsData.length}
+              className="flex w-36 items-center justify-center gap-2 rounded-xl p-2 px-4"
             >
-              <div className="h-5 w-5 bg-navy rounded-full">&nbsp;</div>
-            </div>
-            <p className="text-lg font-semibold md:text-xl lg:text-2xl">
-              No events within {distance} miles of {location}
-            </p>
-            <p className="text-sm text-mid-grey md:text-base lg:text-lg">
-              Events are added all the way up to Christmas, so it&apos;s worth
-              checking back. In the meantime, try a wider search.
-            </p>
-            <Button variant="primary" className="w-fit p-2 px-10 rounded-4xl">
-              Search within 25 miles
+              Next <ArrowRight />
             </Button>
-
-            <Link href="/" className="text-navy underline">
-              or browse every event across the UK as a list
-            </Link>
           </div>
-        )}
-      </section>
+        </div>
+      ) : null}
 
-      {selectedEvent && (
-        <section
-          className={`${isModalOpen ? "fixed top-0 left-0 z-1000" : "hidden"} bg-off-white/45 backdrop-blur-sm h-dvh w-dvw grid place-items-center transition-all ease-in-out duration-300`}
-        >
-          <div className="bg-off-white h-dvh overflow-scroll max-w-270 mx-auto">
-            <div className="bg-navy p-4 py-6 grid gap-4">
-              <button
-                onClick={handleModalClose}
-                className="flex gap-2 items-center cursor-pointer font-bold text-sage text-lg lg:text-xl"
-              >
-                <ArrowLeft />
-                Back to Results
-              </button>
-              <h3 className="text-white text-2xl text-center font-extrabold lg:text-4xl">
-                {selectedEvent.eventName}{" "}
-              </h3>
-              <div className="flex justify-center items-center gap-4">
-                <FilterPill filterName="Free" />
-                <FilterPill filterName="Accessible" />
-              </div>
-            </div>
-
-            <div className="p-4 py-8 flex flex-col gap-6 md:grid md:gap-4 md:px-10 lg:px-12 lg:grid-cols-9">
-              <h4 className="text-lg text-sage font-bold uppercase col-span-full md:text-xl">
-                Hosted by {selectedEvent.organisation}
-              </h4>
-
-              <div className="grid gap-3 lg:col-span-4 lg:grid-cols-2">
-                <div className="text-lg grid grid-cols-[auto_1fr] grid-rows-[fit-content_fit-content] gap-x-2 md:text-xl lg:col-span-full">
-                  <MapPin className="text-sage self-end" />
-                  <h5 className="text-navy font-bold col-start-2 self-end">
-                    {selectedEvent.venueName}
-                  </h5>
-                  <p className="col-start-2 self-start">
-                    {selectedEvent.address}, {selectedEvent.city},{" "}
-                    {selectedEvent.postcode}
-                  </p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl ">
-                  <h5 className="font-bold uppercase">Date</h5>
-                  <p>
-                    {selectedEvent.isChristmasDay &&
-                      "Christmas Day, 25 December"}
-                  </p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl ">
-                  <h5 className="font-bold uppercase">Time</h5>
-                  <p>{selectedEvent.time}</p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl ">
-                  <h5 className="font-bold uppercase">Event Type</h5>
-                  <p>{selectedEvent.eventType}</p>
-                </div>
-
-                <div className="text-lg text-navy md:text-xl ">
-                  <h5 className="font-bold uppercase">Distance</h5>
-                  <p>0.4 Miles</p>
-                </div>
-              </div>
-
-              <div className="rounded-chip overflow-hidden lg:col-span-5 lg:col-start-5 lg:row-start-2">
-                <EventsMap
-                  events={[selectedEvent]}
-                  location={location}
-                  postcodeCoords={postcodeCoordinates as LatLngExpression}
-                  position={selectedEvent.coordinates.latLng}
-                  zoom={20}
-                  isForModal={true}
-                  height="300px"
-                />
-              </div>
-
-              <div className=" col-span-full text-lg text-navy md:text-xl">
-                <h5 className="font-bold uppercase">About this Event</h5>
-                <p>{selectedEvent.description}</p>
-              </div>
-
-              <div className=" col-span-full text-lg text-navy bg-light-sage rounded-chip p-4 md:text-xl">
-                <h5 className="font-bold uppercase mb-4">Accessibility</h5>
-                <p>{selectedEvent.accessibility}</p>
-              </div>
-
-              <div className=" col-span-full text-lg text-navy md:text-xl">
-                <h5 className="font-bold uppercase">Cost</h5>
-                <span>{selectedEvent.cost}</span>
-              </div>
-
-              <div className=" col-span-full text-lg text-navy md:text-xl">
-                <div className="p-4 bg-[#fefddb] text-lg text-navy rounded-chip md:text-xl">
-                  <h5 className="font-bold uppercase bg-light-amber rounded-chip">
-                    Booking
-                  </h5>
-                  <span>{selectedEvent.bookingRequired}</span>
-                </div>
-
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    className="border border-sage p-4 rounded-chip text-navy text-lg font-bold lg:text-xl"
-                  >
-                    {selectedEvent.contactPublic.split("\n")[0]}
-                  </Button>
-
-                  <Button
-                    variant="secondary"
-                    type="button"
-                    className="border border-sage p-4 rounded-chip text-navy text-lg font-bold lg:text-xl"
-                  >
-                    {selectedEvent.contactPublic.split("\n")[1]}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {selectedEvent && isModalOpen ? (
+        <EventModal
+          event={selectedEvent}
+          location={location}
+          postcodeCoords={postcodeCoordinates as LatLngExpression}
+          onClose={handleModalClose}
+        />
+      ) : null}
     </div>
   );
 }

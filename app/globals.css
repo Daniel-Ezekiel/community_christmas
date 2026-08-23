@@ -140,5 +140,250 @@ html {
 body {
   font-size: 1rem;
   line-height: 1.625; /* matches 16px / 26 line-height from type scale */
-  /* overflow: hidden; */
+}
+
+/* Leaflet popups should look like EventCard, not Leaflet's default chrome */
+.event-map-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(17 52 68 / 0.16);
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: var(--ink);
+}
+
+.event-map-popup .leaflet-popup-content {
+  margin: 0;
+  width: 20rem !important;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.event-map-popup .leaflet-popup-content p {
+  margin: 0;
+}
+
+.event-map-popup .leaflet-popup-tip {
+  background: var(--white);
+  box-shadow: none;
+}
+
+.event-map-popup a.leaflet-popup-close-button {
+  top: 10px;
+  right: 10px;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  color: var(--mid-grey);
+}
+
+.event-map-popup a.leaflet-popup-close-button:hover {
+  color: var(--navy);
+}
+
+/* ==========================================================================
+   MICRO-INTERACTIONS
+   Calm, understated motion for older adults. No bounce, pulse, or large scale.
+   ========================================================================== */
+
+button,
+a,
+[role="button"] {
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.event-card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.event-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+@media (min-width: 768px) {
+  .event-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.filter-chip {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.search-submit {
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.search-submit:active {
+  transform: scale(0.98);
+}
+
+.search-bar {
+  transition: box-shadow 0.15s ease;
+}
+
+.search-bar:focus-within {
+  box-shadow: 0 0 0 2px #395460;
+}
+
+.results-card {
+  animation: results-fade 0.25s ease both;
+}
+
+@keyframes results-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-overlay {
+  backdrop-filter: blur(3px);
+  animation: results-fade 0.2s ease both;
+  transition: opacity 0.15s ease;
+}
+
+.modal-overlay.is-closing {
+  animation: none;
+  opacity: 0;
+}
+
+.modal-panel {
+  animation: modal-open 0.2s ease both;
+}
+
+@keyframes modal-open {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-overlay.is-closing .modal-panel {
+  animation: none;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  flex-shrink: 0;
+  align-self: flex-start;
+  transition: box-shadow 0.2s ease;
+}
+
+.site-header-inner,
+.site-header-brand,
+.site-header-intro,
+.site-header-main,
+.search-form,
+.search-radius {
+  transition: all 0.25s ease;
+}
+
+.site-header-brand,
+.site-header-intro {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+@media (max-width: 767px) {
+  .site-header {
+    transition: all 0.25s ease;
+  }
+
+  .search-radius {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .site-header.is-compact .site-header-inner {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .site-header.is-compact .site-header-main,
+  .site-header.is-compact .search-form {
+    margin-top: 0;
+  }
+
+  .site-header.is-compact .site-header-brand,
+  .site-header.is-compact .site-header-intro,
+  .site-header.is-compact .search-radius {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* Leaflet panes use z-index 400–1000. Keep them inside the map so they
+   cannot paint over the sticky header (z-50) or the rest of the page. */
+.leaflet-container {
+  isolation: isolate;
+  z-index: 0;
+}
+
+.site-header.is-scrolled {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes logo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.logo-pulse {
+  animation: logo-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-card,
+  .event-card:hover,
+  .search-submit:active,
+  .results-card,
+  .modal-overlay,
+  .modal-panel,
+  .site-header,
+  .site-header-inner,
+  .site-header-brand,
+  .site-header-intro,
+  .site-header-main,
+  .search-form,
+  .search-radius,
+  .logo-pulse {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
 }

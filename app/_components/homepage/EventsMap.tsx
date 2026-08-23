@@ -24,6 +24,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "/leaflet/marker-shadow.png",
 });
 
+const christmasMarker = L.divIcon({
+  className: "",
+  html: `
+    <svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#E8A020"/>
+      <circle cx="14" cy="14" r="6" fill="#fff" opacity="0.9"/>
+    </svg>
+  `,
+  iconSize: [28, 36],
+  iconAnchor: [14, 36],
+  popupAnchor: [0, -36],
+});
+
 export default function EventsMap({
   position,
   zoom,
@@ -46,12 +59,13 @@ export default function EventsMap({
   const mapRef = useRef<L.Map | null>(null);
 
   return (
-    <div>
+    <div className="relative z-0 isolate overflow-hidden">
       <MapContainer
         center={position}
         zoom={zoom}
         scrollWheelZoom={false}
-        style={{ minHeight: height, width: "100%" }}
+        className={isForModal ? undefined : "h-[200px] md:h-[360px]"}
+        style={{ minHeight: isForModal ? height : undefined, width: "100%" }}
         attributionControl={false}
         ref={(map) => {
           if (map && mapRef.current && mapRef.current !== map) {
@@ -60,7 +74,7 @@ export default function EventsMap({
           mapRef.current = map;
         }}
       >
-        <AttributionControl position="bottomright" prefix={"Leaflet"} />
+        <AttributionControl position="bottomright" prefix="" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -69,24 +83,21 @@ export default function EventsMap({
           <Marker
             key={eventData.id}
             position={eventData.coordinates.latLng}
-            icon={L.icon({
-              iconUrl: "/leaflet/map-pin.svg",
-              iconSize: [30, 95],
-              iconAnchor: [22, 94],
-              popupAnchor: [-3, -76],
-            })}
+            icon={christmasMarker}
           >
             {!isForModal && (
-              <Popup>
+              <Popup
+                className="event-map-popup"
+                minWidth={320}
+                maxWidth={320}
+                closeButton
+              >
                 <EventCard
                   event={eventData}
                   location={location}
                   postcodeCoords={postcodeCoords}
-                  handleModalOpen={([_id]: string[] | string) => {
-                    // Accepts an eventID param to match EventCard's signature,
-                    // but uses the current marker's id when opening the modal.
-                    if (handleModalOpen) handleModalOpen(eventData.id);
-                  }}
+                  handleModalOpen={(id) => handleModalOpen?.(id)}
+                  className="rounded-none border-0 border-l-0 hover:bg-hover-tint [&>div:first-child]:pr-6"
                 />
               </Popup>
             )}
