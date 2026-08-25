@@ -199,7 +199,7 @@ export default function Events() {
 
         <div className="relative hidden md:flex md:items-center md:gap-3">
           <div className="relative min-w-0 flex-1">
-            <div className="flex w-full gap-2 overflow-x-auto py-2 pr-8">
+            <div className="flex w-full gap-2 overflow-x-auto py-2 lg:pr-8">
               {EVENT_FILTERS.map((option) => {
                 const isAll = option.id === "all";
                 const isSelected = isAll
