@@ -62,7 +62,7 @@ function DetailCard({
           : "rounded-card border border-card-border bg-off-white p-4"
       }
     >
-      <h3 className="flex items-center gap-2 text-[12px] font-normal text-[#6b7280]">
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-[#6b7280]">
         <Icon size={16} aria-hidden />
         {label}
       </h3>
@@ -164,7 +164,7 @@ export default function EventModal({
 
   return (
     <div
-      className={`modal-overlay fixed inset-0 z-1000 grid place-items-center bg-navy/40 p-4${isClosing ? " is-closing" : ""}`}
+      className={`modal-overlay fixed inset-0 z-1000 grid place-items-center bg-navy/40 p-4 ${isClosing ? " is-closing" : ""}`}
       onClick={requestClose}
     >
       <div
@@ -172,7 +172,7 @@ export default function EventModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`${openSans.className} modal-panel flex h-auto max-h-[min(90dvh,880px)] w-full max-w-3xl flex-col overflow-y-auto rounded-card bg-white text-[#1a2e3b]`}
+        className={`${openSans.className} modal-panel flex h-auto max-h-[min(90dvh,880px)] w-full max-w-3xl flex-col overflow-y-auto rounded-card bg-white text-[#1a2e3b] border border-sage`}
         onClick={(clickEvent) => clickEvent.stopPropagation()}
       >
         <header className="sticky top-0 z-10 shrink-0 bg-navy px-4 py-4 text-white md:px-8">
@@ -197,7 +197,7 @@ export default function EventModal({
         </header>
 
         <div className="px-4 py-6 md:px-8">
-          <p className="text-center text-sm font-semibold text-[#395460]">
+          <p className="text-center font-semibold text-[#395460]">
             Hosted by {event.organisation}
           </p>
           <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -262,8 +262,8 @@ export default function EventModal({
           </div>
 
           {hasDescription ? (
-            <section className="mt-2">
-              <h3 className="text-[12px] font-normal text-[#6b7280]">
+            <section className="mt-6">
+              <h3 className="text-sm font-semibold text-[#6b7280]">
                 About this event
               </h3>
               <p className="mt-1 text-[#1a2e3b]">{event.description}</p>

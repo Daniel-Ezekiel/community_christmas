@@ -64,7 +64,7 @@ export default function EventsMap({
         center={position}
         zoom={zoom}
         scrollWheelZoom={false}
-        className={isForModal ? undefined : "h-50 md:h-90"}
+        className={isForModal ? undefined : "h-120"}
         style={{ minHeight: isForModal ? height : undefined, width: "100%" }}
         attributionControl={false}
         ref={(map) => {
