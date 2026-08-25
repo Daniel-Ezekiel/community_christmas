@@ -189,7 +189,7 @@ export default function Events() {
   );
 
   return (
-    <div className="w-full mx-auto max-w-7xl">
+    <div className="w-full mx-auto max-w-300">
       <section className="grid gap-4">
         <MobileFilterBar
           selected={selectedFilters}
@@ -268,7 +268,7 @@ export default function Events() {
         ) : null}
       </section>
 
-      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {view === "list" && (
           <>
             {eventsData.length > 0 ? (

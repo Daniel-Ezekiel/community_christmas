@@ -25,8 +25,8 @@ function EventTypeChip({
     <span
       className={
         compact
-          ? "inline-block w-auto max-w-full self-start truncate rounded-[20px] border border-[#e5e7eb] bg-[#f3f4f6] px-[10px] py-1 text-[12px] text-[#395460]"
-          : "inline-block max-w-[50%] truncate rounded-pill border border-[#e5e7eb] bg-off-white px-[10px] py-[3px] text-[12px] text-navy"
+          ? "inline-block w-auto max-w-full self-start truncate rounded-chip border border-[#e5e7eb] bg-[#f3f4f6] px-2.5 py-1 text-xs text-navy font-medium"
+          : "inline-block max-w-[50%] truncate rounded-pill border border-[#e5e7eb] bg-off-white px-2.5 py-0.75 text-sm text-navy"
       }
     >
       {eventType}
@@ -39,8 +39,8 @@ function PriceBadge({ free }: { free: boolean }) {
     <span
       className={
         free
-          ? "shrink-0 rounded-pill bg-free-fill px-2 py-0.5 text-xs font-semibold text-free-text md:px-3 md:py-1 md:text-sm"
-          : "shrink-0 rounded-pill bg-paid-fill px-2 py-0.5 text-xs font-semibold text-amber-dark md:px-3 md:py-1 md:text-sm"
+          ? "shrink-0 rounded-pill bg-free-fill px-2 py-0.5 text-sm font-semibold text-free-text md:px-3 md:py-1 md:text-sm"
+          : "shrink-0 rounded-pill bg-paid-fill px-2 py-0.5 text-sm font-semibold text-amber-dark md:px-3 md:py-1 md:text-sm"
       }
     >
       {free ? "Free" : "Paid"}
@@ -84,13 +84,13 @@ export default function EventCard({
     >
       <div className="flex items-start justify-between gap-3 md:hidden">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h3 className="event-card-title font-semibold text-navy">
+          <h3 className="event-card-title font-bold text-navy">
             {event.eventName}
           </h3>
-          <p className="line-clamp-2 text-sm font-medium text-[#6b7280]">
+          <p className="line-clamp-2 text-sm font-medium text-navy">
             {venueLabel}
           </p>
-          <p className="flex min-w-0 items-center gap-1.5 text-sm text-mid-grey">
+          <p className="flex min-w-0 items-center gap-1.5 text-sm font- text-navy">
             <Clock size={16} className="shrink-0" aria-hidden />
             <span>{event.time}</span>
             {accessible ? (
@@ -105,7 +105,7 @@ export default function EventCard({
             ) : null}
           </p>
           {distanceInMiles != null ? (
-            <p className="text-sm text-mid-grey">
+            <p className="text-sm text-navy font-medium">
               {distanceInMiles.toFixed(1)} miles away
             </p>
           ) : null}
@@ -116,20 +116,20 @@ export default function EventCard({
 
       <div className="hidden h-full min-h-0 flex-col md:flex">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="event-card-title min-w-0 text-[15px] font-bold leading-snug text-navy">
+          <h3 className="event-card-title min-w-0 font-bold leading-snug text-navy">
             {event.eventName}
           </h3>
           <PriceBadge free={free} />
         </div>
-        <p className="mt-1.5 text-[13px] text-[#6b7280]">{venueLabel}</p>
-        <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[13px] text-[#6b7280]">
+        <p className="mt-1.5 text-sm text-navy">{venueLabel}</p>
+        <p className="mt-1.5 flex min-w-0 items-center gap-1.5 text-sm text-navy">
           <Clock size={14} className="shrink-0" aria-hidden />
           <span>{event.time}</span>
           {accessible ? (
             <span className="inline-flex items-center gap-1.5">
               <span aria-hidden>·</span>
               <Accessibility
-                size={14}
+                size={18}
                 aria-label="Accessible venue"
               />
             </span>
