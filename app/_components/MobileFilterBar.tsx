@@ -52,7 +52,7 @@ export default function MobileFilterBar({
           aria-controls={panelId}
           onClick={() => setOpen((current) => !current)}
           className={cn(
-            "filter-chip inline-flex min-h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-pill border px-2.5 text-xs font-medium",
+            "filter-chip inline-flex min-h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-pill border px-2.5 text-sm font-medium",
             !showingAll || open
               ? "border-navy bg-light-sage text-navy"
               : "border-card-border bg-white text-navy hover:bg-hover-tint",
@@ -61,7 +61,7 @@ export default function MobileFilterBar({
           <SlidersHorizontal size={14} aria-hidden />
           Filters
           {selected.length > 0 ? (
-            <span className="rounded-pill bg-navy px-1.5 text-[10px] font-semibold text-white">
+            <span className="rounded-pill bg-navy px-1.5 text-sm font-semibold text-white">
               {selected.length}
             </span>
           ) : null}
@@ -70,7 +70,7 @@ export default function MobileFilterBar({
           <button
             type="button"
             onClick={onClear}
-            className="cursor-pointer text-[13px] text-navy underline"
+            className="cursor-pointer text-sm text-navy font-semibold underline"
           >
             Clear all
           </button>
