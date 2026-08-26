@@ -20,29 +20,14 @@ export default function ViewToggle({
   ];
 
   return (
-    <>
-      {/* <button
-        type="button"
-        onClick={() => onChange(value === "list" ? "map" : "list")}
-        aria-label={
-          value === "list" ? "Switch to map view" : "Switch to list view"
-        }
-        className={cn(
-          "inline-flex min-h-10 cursor-pointer items-center rounded-pill border border-card-border bg-navy px-4 text-sm font-semibold text-white md:hidden",
-          className,
-        )}
-      >
-        {value === "list" ? "List view" : "Map view"}
-      </button> */}
-
-      <div
-        role="group"
-        aria-label="Results view"
-        className={cn(
-          "grid grid-cols-2 rounded-pill border border-card-border bg-white p-1",
-          className ?? "w-full max-w-72 justify-self-end",
-        )}
-      >
+    <div
+      role="group"
+      aria-label="Results view"
+      className={cn(
+        "grid grid-cols-2 rounded-pill border border-card-border bg-white p-1",
+        className ?? "w-full max-w-72 justify-self-end",
+      )}
+    >
         {options.map(({ id, label, icon: Icon }) => {
           const selected = value === id;
           return (
@@ -62,6 +47,5 @@ export default function ViewToggle({
           );
         })}
       </div>
-    </>
   );
 }

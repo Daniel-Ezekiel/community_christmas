@@ -254,7 +254,14 @@ export default function Events() {
           />
         </div>
 
-        {eventsData.length > 0 && view === "map" ? (
+        {eventsData.length === 0 ? (
+          <div className="mt-4">
+            <EmptyState
+              location={location ?? "this search"}
+              distance={distance}
+            />
+          </div>
+        ) : view === "map" ? (
           <div className="col-span-full overflow-hidden rounded-card">
             <EventsMap
               position={[54.0, -2.5]}
@@ -268,31 +275,22 @@ export default function Events() {
         ) : null}
       </section>
 
-      <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {view === "list" && (
-          <>
-            {eventsData.length > 0 ? (
-              eventsData
-                .slice((currentPage - 1) * 12, currentPage * 12)
-                .map((event) => (
-                  <EventCard
-                    key={`${event.id}-${selectedFilters.join(",")}-${currentPage}-${location}-${distance}`}
-                    event={event}
-                    location={location}
-                    postcodeCoords={postcodeCoordinates as LatLngExpression}
-                    handleModalOpen={handleModalOpen}
-                    className="results-card"
-                  />
-                ))
-            ) : (
-              <EmptyState
-                location={location ?? "this search"}
-                distance={distance}
+      {eventsData.length > 0 && view === "list" && (
+        <section className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {eventsData
+            .slice((currentPage - 1) * 12, currentPage * 12)
+            .map((event) => (
+              <EventCard
+                key={`${event.id}-${selectedFilters.join(",")}-${currentPage}-${location}-${distance}`}
+                event={event}
+                location={location}
+                postcodeCoords={postcodeCoordinates as LatLngExpression}
+                handleModalOpen={handleModalOpen}
+                className="results-card"
               />
-            )}
-          </>
-        ) }
-      </section>
+            ))}
+        </section>
+      )}
 
       {eventsData.length > 12 && view === "list" ? (
         <div className="mt-4 mb-10 border-t border-[#e5e7eb] pt-4">

@@ -90,7 +90,7 @@ export default function EventCard({
           <p className="line-clamp-2 text-sm font-medium text-navy">
             {venueLabel}
           </p>
-          <p className="flex min-w-0 items-center gap-1.5 text-sm font- text-navy">
+          <p className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-navy">
             <Clock size={16} className="shrink-0" aria-hidden />
             <span>{event.time}</span>
             {accessible ? (
@@ -135,6 +135,11 @@ export default function EventCard({
             </span>
           ) : null}
         </p>
+        {distanceInMiles != null ? (
+          <p className="mt-1.5 text-sm text-navy font-medium">
+            {distanceInMiles.toFixed(1)} miles away
+          </p>
+        ) : null}
         <div className="mt-auto pt-3">
           <EventTypeChip eventType={event.eventType} />
         </div>

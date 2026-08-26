@@ -24,19 +24,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "/leaflet/marker-shadow.png",
 });
 
-const christmasMarker = L.divIcon({
-  className: "",
-  html: `
-    <svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.33 14 22 14 22S28 23.33 28 14C28 6.27 21.73 0 14 0z" fill="#E8A020"/>
-      <circle cx="14" cy="14" r="6" fill="#fff" opacity="0.9"/>
-    </svg>
-  `,
-  iconSize: [28, 36],
-  iconAnchor: [14, 36],
-  popupAnchor: [0, -36],
-});
-
 export default function EventsMap({
   position,
   zoom,
@@ -45,7 +32,7 @@ export default function EventsMap({
   postcodeCoords,
   handleModalOpen,
   isForModal = false,
-  height = "475px",
+  height = "360px",
 }: {
   position: LatLngExpression;
   zoom?: number;
@@ -64,9 +51,8 @@ export default function EventsMap({
         center={position}
         zoom={zoom}
         scrollWheelZoom={false}
-        className={isForModal ? undefined : "h-120"}
+        className={isForModal ? undefined : "h-[200px] md:h-[360px]"}
         style={{ minHeight: isForModal ? height : undefined, width: "100%" }}
-        attributionControl={false}
         ref={(map) => {
           if (map && mapRef.current && mapRef.current !== map) {
             mapRef.current.remove(); // strips the old instance's _leaflet_id stamp
@@ -74,7 +60,7 @@ export default function EventsMap({
           mapRef.current = map;
         }}
       >
-        <AttributionControl position="bottomright" prefix={"Leaflet"} />
+        <AttributionControl position="bottomright" />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -83,7 +69,6 @@ export default function EventsMap({
           <Marker
             key={eventData.id}
             position={eventData.coordinates.latLng}
-            icon={christmasMarker}
           >
             {!isForModal && (
               <Popup
