@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MarmaladeLogo from "@/app/assets/images/Marmalade_Logo.png";
+import ChristmasIllustration from "@/app/assets/images/christmas-baubles-illustration.png";
 import SearchForm from "../_components/SearchForm";
 
 export default function Header() {
@@ -74,14 +75,20 @@ export default function Header() {
             </div>
             <Suspense
               fallback={
-                <div className="mx-auto mt-4 h-12 rounded-full bg-white/15" />
+                <div className="mx-auto mt-4 h-12 max-w-xl rounded-full bg-white/15" />
               }
             >
               <SearchForm />
             </Suspense>
           </div>
+
+          <Image
+            src={ChristmasIllustration}
+            alt=""
+            className="hidden w-44 justify-self-end object-contain object-top md:block md:-mt-8 lg:w-56"
+          />
         </div>
-      </div>
+      </nav>
     </header>
   );
 }
