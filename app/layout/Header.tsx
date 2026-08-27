@@ -16,7 +16,7 @@ export default function Header() {
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 0);
-      setPastThreshold(y > 100);
+      setPastThreshold(y > 40);
     };
 
     onScroll();
